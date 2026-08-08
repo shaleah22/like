@@ -1,0 +1,1590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Combining Like Terms</title>
+<style>
+  :root{
+    --ink:#0f172a; --line:#1e293b; --muted:#64748b; --faint:#94a3b8;
+    --blue:#1d4ed8; --blue-b:#3b82f6; --blue-bg:#eff6ff;
+    --green:#059669; --green-bg:#ecfdf5;
+    --rose:#e11d48; --rose-bg:#fff1f2;
+    --page:#f8fafc; --edge:#e2e8f0;
+
+    /* one colour per family of like terms. The colour is the whole idea of the
+       drill made visible: terms that can be added share a colour, terms that
+       cannot never do */
+    --c0:#1d4ed8; --b0:#eff6ff; --e0:#bfdbfe;
+    --c1:#7c3aed; --b1:#f5f3ff; --e1:#ddd6fe;
+    --c2:#0d9488; --b2:#f0fdfa; --e2:#99f6e4;
+    --c3:#b45309; --b3:#fffbeb; --e3:#fde68a;
+  }
+  *{box-sizing:border-box;}
+  /* the writing is sized to be read, not to be squeezed into one screen. If a
+     problem runs past the bottom of the window the page scrolls, which costs a
+     flick of the thumb and buys back a font a student can actually see */
+  html,body{height:auto;margin:0;}
+  body{
+    background:var(--page); color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .app{min-height:100vh;display:flex;flex-direction:column;padding:12px 16px 32px;}
+  .wrap{width:100%;max-width:70rem;margin:0 auto;display:flex;flex-direction:column;}
+
+  /* nav tabs */
+  .nav-tabs{display:flex;gap:6px;margin-bottom:12px;border-bottom:2px solid var(--edge);
+            padding-bottom:2px;overflow-x:auto;scrollbar-width:thin;}
+  .tab-btn{
+    background:none; border:none; padding:9px 14px; font-size:1rem; font-weight:600;
+    color:var(--muted); cursor:pointer; border-radius:6px 6px 0 0; transition:all .15s ease;
+    white-space:nowrap;
+  }
+  .tab-btn:hover{color:var(--ink); background:var(--edge);}
+  .tab-btn.active{color:var(--blue); border-bottom:3px solid var(--blue); background:#fff;}
+  .tab-btn sup{font-size:.62em;vertical-align:super;line-height:0;}
+
+  /* header */
+  .top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 16px;flex-shrink:0;}
+  h1{font-size:1.2rem;font-weight:600;text-transform:uppercase;letter-spacing:.18em;margin:0;}
+  .levels{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .score{font-size:.88rem;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap;}
+  .score b{color:var(--green);}
+  /* the scaffolding thins out on a run, and the header says so rather than
+     letting the wording quietly change underfoot */
+  .lean{font-size:.76rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+        color:var(--muted);background:var(--edge);border-radius:999px;padding:2px 9px;white-space:nowrap;}
+  .tally{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;font-size:.82rem;
+         color:var(--faint);font-variant-numeric:tabular-nums;}
+  .tally span{white-space:nowrap;}
+  .tally b{color:var(--muted);font-weight:600;}
+  .tally sup{font-size:.62em;vertical-align:super;line-height:0;}
+
+  /* work area */
+  .ghost{position:absolute;left:-10000px;top:0;visibility:hidden;pointer-events:none;width:max-content;}
+  .main{display:flex;flex-direction:column;gap:0;padding-top:8px;}
+  .work{min-width:0;display:flex;flex-direction:column;align-items:center;
+        align-items:safe center;justify-content:flex-start;padding:18px 0 6px;}
+  /* the working and the panel under it scale together as one block, so the size is
+     set once per problem and nothing shifts underfoot part-way through a solve */
+  .stagebox{display:flex;justify-content:center;align-items:flex-start;flex-shrink:0;}
+  .stage{display:flex;flex-direction:column;align-items:center;gap:16px;transform-origin:top center;}
+
+  /* an expression is one line of terms, not two sides of an equals, so the
+     working is a stack of centred lines rather than a three-column grid */
+  .eq{display:flex;flex-direction:column;align-items:center;gap:0;
+      font-family:Georgia,"Times New Roman",serif;font-size:2.2rem;}
+  .line{display:flex;align-items:center;justify-content:center;flex-wrap:nowrap;
+        gap:4px;min-height:4.3rem;white-space:nowrap;}
+  .line.quiet{color:var(--faint);}
+  .line.answer{color:var(--green);}
+
+  /* a term carries its own sign. Colouring the chip colours the sign with it,
+     because the sign in front of a term belongs to that term and travels with
+     it everywhere the term goes */
+  .tm{display:inline-flex;align-items:center;gap:6px;border:2px solid transparent;
+      border-radius:9px;padding:2px 8px;background:none;color:inherit;
+      font-family:inherit;font-size:inherit;line-height:1.25;}
+  .tm sup{font-size:.58em;vertical-align:super;line-height:0;}
+  .tm.pick{cursor:pointer;}
+  .tm.pick:hover{background:#eef2f7;}
+  .tm.pick:focus-visible{outline:3px solid var(--blue-b);outline-offset:2px;}
+  .tm.t0{color:var(--c0);background:var(--b0);border-color:var(--e0);}
+  .tm.t1{color:var(--c1);background:var(--b1);border-color:var(--e1);}
+  .tm.t2{color:var(--c2);background:var(--b2);border-color:var(--e2);}
+  .tm.t3{color:var(--c3);background:var(--b3);border-color:var(--e3);}
+  .tm.grow{animation:grow .3s ease-out;}
+  .tm.shake{animation:shake .34s;border-color:#fb7185;background:var(--rose-bg);color:var(--rose);}
+  .tm.dim{opacity:.42;}
+  /* a group that came to nothing is struck out and then goes, and the line
+     closes up behind it. Seeing the pair leave is the whole lesson of a
+     cancelling group, so it is worth a beat of watching */
+  .tm.zap{text-decoration:line-through;text-decoration-thickness:3px;
+          animation:zap 1.15s ease-in forwards;}
+  @keyframes zap{0%,30%{opacity:1;transform:none;}100%{opacity:0;transform:scale(.8);}}
+
+  .brk{display:inline-flex;align-items:center;gap:5px;}
+  .paren{color:var(--line);font-size:1.25em;line-height:1;}
+
+  /* a fraction in front of a letter is written the way it is written by hand,
+     one number over another, not with a slash */
+  .dfrac{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;
+         line-height:1.08;margin:0 2px;font-size:.7em;}
+  .dfrac > .t,.dfrac > .b{padding:0 4px;}
+  .dfrac > .bar{width:100%;min-width:1.1rem;border-top:2px solid currentColor;margin:2px 0;}
+
+  /* the group being built gets restated on its own line, with the box that
+     takes its total on the end. The terms come down in the order they are
+     picked, which is the student's order */
+  .line.work{gap:6px;}
+  .eqs{color:var(--faint);margin:0 12px;}
+  .waiting{color:var(--faint);font-size:.55em;letter-spacing:.06em;text-transform:uppercase;
+           font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;}
+
+  .hide{visibility:hidden;}
+  .blue{color:var(--blue);}
+  .green{color:var(--green);}
+  .faint{color:var(--faint);}
+  @keyframes grow{from{opacity:0;transform:translateY(-6px);}to{opacity:1;transform:none;}}
+  @keyframes shake{0%,100%{transform:none;}25%{transform:translateX(-5px);}75%{transform:translateX(5px);}}
+
+  /* inputs */
+  .box{height:3.1rem;width:4.3rem;border:2px solid var(--blue-b);background:var(--blue-bg);color:var(--blue);
+       border-radius:7px;text-align:center;font-family:Georgia,"Times New Roman",serif;font-size:1.85rem;
+       outline:none;transition:border-color .15s,background .15s;}
+  .box.term{width:6.6rem;}
+  .box:focus{border-color:var(--blue);background:#fff;}
+  .box.ok{border-color:#10b981;background:var(--green-bg);color:var(--green);}
+  /* an empty box wears the colour of the group it belongs to, so it is obvious
+     which pile of terms it is waiting on */
+  .box.g0{border-color:var(--e0);background:var(--b0);color:var(--c0);}
+  .box.g1{border-color:var(--e1);background:var(--b1);color:var(--c1);}
+  .box.g2{border-color:var(--e2);background:var(--b2);color:var(--c2);}
+  .box.g3{border-color:var(--e3);background:var(--b3);color:var(--c3);}
+
+  /* the panel that sits under the working */
+  .checkline{width:100%;text-align:center;font-family:Georgia,serif;font-size:1.5rem;line-height:2;
+             white-space:nowrap;}
+  .checkline .orig{color:var(--faint);}
+  .checkline .sub{margin-top:6px;}
+  .checkline sup{font-size:.58em;vertical-align:super;line-height:0;}
+  .checkline .val{color:var(--green);}
+
+  /* prompt bar */
+  /* fixed height on purpose: a hint or a nudge appearing must not change how much
+     room the working has, or the writing would resize mid-problem */
+  .promptbar{width:100%;flex-shrink:0;min-height:6.4rem;border-bottom:1px solid var(--edge);
+             padding:0 0 10px 0;--ps:1;
+             display:flex;flex-wrap:wrap;align-items:flex-start;column-gap:16px;row-gap:4px;}
+  .prompt{flex:1 1 26rem;min-width:0;
+          display:flex;flex-wrap:wrap;align-items:center;gap:6px 9px;color:#334155;
+          font-size:calc(1.15rem*var(--ps));line-height:1.5;}
+  .tagline{margin-bottom:0;}
+  .skipwrap{margin-left:auto;align-self:center;}
+  .prompt .math{font-family:Georgia,serif;}
+  .prompt .math sup,.hintline .math sup{font-size:.6em;vertical-align:super;line-height:0;}
+  .prompt strong{font-weight:600;}
+  .tag{display:inline-block;font-size:calc(.8rem*var(--ps,1));font-weight:700;letter-spacing:.09em;text-transform:uppercase;
+       color:var(--blue);background:var(--blue-bg);border:1px solid #bfdbfe;border-radius:999px;
+       padding:3px 11px;white-space:nowrap;}
+  .count{font-size:calc(.84rem*var(--ps,1));color:var(--faint);font-variant-numeric:tabular-nums;}
+  .link{background:none;border:none;padding:0;color:var(--muted);font-size:calc(1rem*var(--ps,1));font-family:inherit;
+        text-decoration:underline;text-underline-offset:4px;cursor:pointer;}
+  .link:hover{color:var(--ink);}
+  .hintline{width:100%;font-size:calc(1rem*var(--ps,1));color:#475569;display:flex;flex-wrap:wrap;align-items:center;gap:6px;}
+  .hintline .math{font-family:Georgia,serif;}
+  .missline{flex:1 1 100%;margin-top:3px;font-size:calc(1rem*var(--ps,1));color:var(--rose);}
+  .noteline{width:100%;margin-top:3px;font-size:calc(1rem*var(--ps,1));color:var(--muted);}
+  .next{background:var(--ink);color:#fff;border:none;border-radius:8px;padding:9px 20px;
+        font-size:calc(1.05rem*var(--ps,1));font-weight:500;cursor:pointer;font-family:inherit;white-space:nowrap;}
+  .next:hover{background:#1e293b;}
+
+  @media (max-width:1150px){ .main{padding-top:6px;} }
+  /* a narrow screen still gets the larger writing — it just gets more of the
+     scrolling that pays for it */
+  @media (max-width:860px){
+    .tab-btn{padding:7px 11px;font-size:.9rem;}
+    .eq{font-size:1.85rem;}
+    .line{min-height:3.6rem;}
+    .eqs{margin:0 7px;}
+    h1{font-size:1.02rem;}
+    .checkline{font-size:1.2rem;line-height:1.9;}
+    .box{height:2.7rem;width:3.7rem;font-size:1.55rem;}
+    .box.term{width:5.7rem;}
+    .promptbar{--ps:.95;}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .tm.grow,.tm.shake{animation:none;}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="wrap">
+    <div class="nav-tabs" id="navTabs"></div>
+
+    <div class="top">
+      <h1 id="title">Combining like terms</h1>
+      <div class="levels" id="levels"></div>
+    </div>
+
+    <div class="main">
+      <div class="promptbar" id="promptbar"></div>
+
+      <div class="work">
+        <div class="stagebox" id="stagebox">
+          <div class="stage" id="stage">
+            <div class="eq" id="eq"></div>
+            <div id="panel"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- offscreen: a finished copy of the problem is drawn here and measured, so the
+     real one can be sized once and then left alone -->
+<div class="ghost" id="ghost" aria-hidden="true"></div>
+<script>
+
+/* ============ shell: one score, tabs state, router ============ */
+const Shell = {
+  done:0, streak:0, active:null, activeEng:null,
+  mode:"simple", engines:{}, timers:[], recent:[],
+  counts:{},
+
+  title:"Combining like terms",
+  kinds:[
+    {id:"simple",    tab:"One Letter",   tally:"3x &hellip; 5x",  name:"One letter and loose numbers"},
+    {id:"twovars",   tab:"Two Letters",  tally:"a &hellip; b",    name:"Two different letters"},
+    {id:"powers",    tab:"Powers",       tally:"x<sup>2</sup> &hellip; x", name:"Squares and plain letters"},
+    {id:"products",  tab:"xy Terms",     tally:"xy &hellip; x",   name:"Two letters multiplied together"},
+    {id:"brackets",  tab:"Brackets",     tally:"k(x + a)",        name:"A bracket to multiply out"},
+    {id:"double",    tab:"Two Brackets", tally:"k(&middot;) &plusmn; m(&middot;)", name:"Two brackets to multiply out"},
+    {id:"fractions", tab:"Fractions",    tally:"&frac12;x &hellip; &frac13;x", name:"Fractions in front"},
+    {id:"cancel",    tab:"Cancelling",   tally:"5x &minus; 5x",   name:"A group that comes to nothing"},
+    {id:"everything",tab:"Everything",   tally:"all at once",     name:"Several of these at once"}
+  ],
+  /* the harder kinds are given the shorter wording from the first problem: a
+     student who has chosen them is not the student who needs every step spelt
+     out. The full working is always one press of Hint away. */
+  hard:{products:1, double:1, fractions:1, cancel:1, everything:1},
+
+  kind:function(id){
+    const ks=Shell.kinds;
+    for(let i=0;i<ks.length;i++) if(ks[i].id===id) return ks[i];
+    return ks[0];
+  },
+
+  later:function(ms,fn){ Shell.timers.push(setTimeout(fn,ms)); },
+  clearTimers:function(){ Shell.timers.forEach(clearTimeout); Shell.timers=[]; },
+
+  /* One size per problem. The engine works the scale out from the finished
+     problem before the first line is drawn and holds it for every step, so the
+     writing never changes size while the student is working. */
+  scale:1,
+  applyScale:function(){
+    const stage=document.getElementById("stage");
+    if(!stage) return;
+    const box=stage.parentNode, s=Shell.scale;
+    if(s<0.999){
+      stage.style.transform="scale("+s+")";
+      box.style.height=Math.ceil(stage.offsetHeight*s)+"px";
+    } else {
+      stage.style.transform="none";
+      box.style.height="";
+    }
+  },
+  /* only the width is reported: the page scrolls, so there is no height budget
+     to fit the writing into */
+  room:function(){
+    const work=document.querySelector(".work");
+    return {w:work.clientWidth};
+  },
+  ghost:function(html){
+    const g=document.getElementById("ghost");
+    g.innerHTML=html;
+    const out=[].map.call(g.children,function(c){ return {w:c.offsetWidth, h:c.offsetHeight}; });
+    g.innerHTML="";
+    return out;
+  },
+  /* the size depends on width alone, so a change in height is ignored. Without
+     that guard the work area growing a line taller would ask for a refit, which
+     resizes the work area, which asks again */
+  watchFit:function(){
+    let queued=false, lastW=0;
+    const go=function(){
+      if(queued) return;
+      queued=true;
+      requestAnimationFrame(function(){
+        queued=false;
+        const work=document.querySelector(".work");
+        const w=work?work.clientWidth:0;
+        if(w===lastW) return;
+        lastW=w;
+        if(Shell.onResize) Shell.onResize();
+      });
+    };
+    window.addEventListener("resize",go);
+    if(window.ResizeObserver){
+      const ro=new ResizeObserver(go);
+      ro.observe(document.querySelector(".work"));
+    }
+  },
+
+  /* the scaffolding thins out once the student is clearly not needing it */
+  LEAN:3,
+  lean:function(){
+    return !!Shell.hard[Shell.active] || Shell.streak>=Shell.LEAN;
+  },
+
+  head:function(id){
+    const c=Shell.counts;
+    document.getElementById("title").innerHTML = Shell.title;
+    /* eight kinds is too many to list every time, so the breakdown is kept for
+       mixed practice, where knowing which kind you are short of is the point */
+    let tally="";
+    if(Shell.mode==="mixed"){
+      tally='<span class="tally">'
+        + Shell.kinds.filter(function(x){ return c[x.id]; }).map(function(x){
+            return '<span title="'+x.name+'">'+x.tally+' <b>'+c[x.id]+'</b></span>';
+          }).join("")
+        + '</span>';
+    }
+    document.getElementById("levels").innerHTML =
+      '<span class="score">'+Shell.done+' done &middot; <b>'+Shell.streak+'</b> in a row</span>'
+      + (Shell.lean() ? '<span class="lean" title="Shorter wording &mdash; the full working is still under Hint">'
+                      + (Shell.hard[Shell.active]?'lean':'lean &middot; on a run')+'</span>' : "")
+      + tally;
+  },
+  solved:function(clean){
+    Shell.done++;
+    Shell.streak = clean ? Shell.streak+1 : 0;
+    if(Shell.active) Shell.counts[Shell.active]=(Shell.counts[Shell.active]||0)+1;
+  },
+
+  /* don't let one kind of problem come up three times running in mixed mode */
+  pickKind:function(){
+    if(Shell.mode !== "mixed") return Shell.mode;
+    let pool=Shell.kinds.map(function(k){return k.id;});
+    if(Shell.recent.length>1 && Shell.recent[0]===Shell.recent[1]){
+      pool=pool.filter(function(k){return k!==Shell.recent[0];});
+    }
+    const k=pool[Math.floor(Math.random()*pool.length)];
+    Shell.recent.unshift(k); Shell.recent=Shell.recent.slice(0,2);
+    return k;
+  },
+
+  next:function(){
+    Shell.clearTimers();
+    document.getElementById("panel").innerHTML="";
+    const id=Shell.pickKind();
+    Shell.active=id; Shell.activeEng="like";
+    Shell.engines["like"].start(id);
+  },
+
+  paintTabs:function(){
+    document.getElementById("navTabs").innerHTML =
+      Shell.kinds.map(function(k){
+        return '<button class="tab-btn'+(Shell.mode===k.id?" active":"")
+             + '" data-mode="'+k.id+'">'+k.tab+'</button>';
+      }).join("")
+      + '<button class="tab-btn'+(Shell.mode==="mixed"?" active":"")+'" data-mode="mixed">Mixed</button>';
+    document.querySelectorAll("#navTabs .tab-btn").forEach(function(btn){
+      btn.onclick = function(){ Shell.setTab(btn.getAttribute("data-mode")); };
+    });
+  },
+  setTab:function(mode){
+    if(Shell.mode === mode) return;
+    Shell.mode = mode; Shell.recent=[];
+    Shell.paintTabs();
+    Shell.next();
+  }
+};
+
+Shell.paintTabs();
+Shell.watchFit();
+
+/* ================= combining like terms =================
+   One move, repeated: pick a term, pick everything like it, add them up.
+   Nothing about the order is the page's to decide. A bracket adds a step at
+   the front; the check at the end puts a number in for the letters twice over,
+   because combining like terms changes how an expression is written and never
+   what it is worth.                                                        */
+Shell.engines["like"] = (function(){
+const KEY="like";
+
+/* ============ formatting ============ */
+const MINUS="\u2212", TIMES="\u00d7";
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+function dash(s){return String(s).replace(/-/g,MINUS);}
+function rint(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+function pick(a){return a[Math.floor(Math.random()*a.length)];}
+function sgn(p){ return Math.random()<p ? -1 : 1; }
+function gcd(a,b){a=Math.abs(a);b=Math.abs(b);while(b){const t=b;b=a%b;a=t;}return a||1;}
+function lcm(a,b){return Math.abs(a/gcd(a,b)*b);}
+function listWords(a){
+  if(a.length===1) return String(a[0]);
+  return a.slice(0,-1).join(", ")+" and "+a[a.length-1];
+}
+function shuffle(a){
+  const out=a.slice();
+  for(let i=out.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    const t=out[i]; out[i]=out[j]; out[j]=t;
+  }
+  return out;
+}
+
+/* ============ the number in front ============
+   Every coefficient is a fraction, whole numbers being the ones over 1. Doing
+   it this way throughout means the fractions tab is the same drill as the
+   others rather than a special case bolted on the side. */
+function R(n,d){
+  d = d===undefined ? 1 : d;
+  if(d<0){ n=-n; d=-d; }
+  const g=gcd(n,d)||1;
+  return {n:n/g, d:d/g};
+}
+function rAdd(a,b){ return R(a.n*b.d+b.n*a.d, a.d*b.d); }
+function rMul(a,b){ return R(a.n*b.n, a.d*b.d); }
+function rNeg(a){ return R(-a.n,a.d); }
+function rAbs(a){ return R(Math.abs(a.n),a.d); }
+function rZero(a){ return a.n===0; }
+function rNegQ(a){ return a.n<0; }
+function rEq(a,b){ return a.n===b.n && a.d===b.d; }
+function rOne(a){ return a.n===1 && a.d===1; }
+function rWhole(a){ return a.d===1; }
+/* plain text, for a sentence: 3, or 3/4 */
+function rTxt(a){ return a.d===1 ? dash(String(a.n)) : dash(String(a.n))+"/"+a.d; }
+/* written out, for a line of algebra: a fraction is stacked the way it is
+   written by hand */
+function rHTML(a){
+  if(a.d===1) return dash(String(a.n));
+  const sign = a.n<0 ? MINUS : "";
+  return sign+'<span class="dfrac"><span class="t">'+Math.abs(a.n)
+       + '</span><span class="bar"></span><span class="b">'+a.d+'</span></span>';
+}
+
+/* ============ terms ============
+   A term is {c, vs}: a coefficient and a list of letters with their powers,
+   kept sorted so that yx and xy are the same thing. Two terms are alike when
+   their letter lists match exactly, which is the whole of the rule and the
+   whole of the drill. */
+function V(v,p){ return {v:v, p:p===undefined?1:p}; }
+function normVs(list){
+  const by={};
+  list.forEach(function(x){ if(x.p) by[x.v]=(by[x.v]||0)+x.p; });
+  return Object.keys(by).sort().map(function(v){ return V(v,by[v]); });
+}
+function T(c,vs){ return {c:c, vs:normVs(vs||[])}; }
+function Ti(n,vs){ return T(R(n), vs); }
+function vsKey(vs){ return vs.length ? vs.map(function(x){return x.v+"^"+x.p;}).join("*") : "#"; }
+function vsHTML(vs){ return vs.map(function(x){ return x.v+(x.p>1?"<sup>"+x.p+"</sup>":""); }).join(""); }
+function vsTxt(vs){ return vs.map(function(x){ return x.v+(x.p>1?"^"+x.p:""); }).join(""); }
+function letters(vs){ return vs.map(function(x){ return x.v; }).join(""); }
+function famKey(t){ return vsKey(t.vs); }
+function famName(t){
+  return t.vs.length ? "the "+vsHTML(t.vs)+" terms" : "the loose numbers";
+}
+
+/* what a term looks like written down. The first term on a line shows a sign
+   only when it is negative; every term after it shows one either way */
+function bodyStr(t){
+  const a=rAbs(t.c);
+  if(!t.vs.length) return rHTML(a);
+  if(rOne(a)) return vsHTML(t.vs);
+  return rHTML(a)+vsHTML(t.vs);
+}
+function opStr(t,first){ return rNegQ(t.c) ? MINUS : (first ? "" : "+"); }
+function termStr(t,first){
+  const o=opStr(t,first);
+  return (o?'<span class="op">'+o+'</span>':"")+'<span class="bd">'+bodyStr(t)+'</span>';
+}
+function termText(t,first){
+  const o=opStr(t,first);
+  return (o?o+" ":"")+bodyStr(t);
+}
+/* on a line, a term's sign sits between it and the term before. Named inside a
+   sentence it has nowhere to sit, so it goes on the front */
+function signedBody(t){ return (rNegQ(t.c)?MINUS:"")+bodyStr(t); }
+/* the same, in plain text for a sentence */
+function plainTerm(t){
+  const a=rAbs(t.c), s=rNegQ(t.c)?MINUS:"";
+  if(!t.vs.length) return s+rTxt(a);
+  return s+(rOne(a)?"":rTxt(a))+vsTxt(t.vs);
+}
+
+/* ============ reading what the student typed ============
+   Half of 5x can be written 5x/2 or (5/2)x, and both are how people write it,
+   so both are read. Letters may be given in any order and repeated: yx and xx
+   come back as xy and x squared. */
+function parseTerm(raw){
+  if(raw===null||raw===undefined) return null;
+  let s=String(raw).trim().replace(/[\u2212\u2013\u2014]/g,"-").replace(/\s+/g,"").toLowerCase();
+  s=s.replace(/\u00b2/g,"^2").replace(/\u00b3/g,"^3").replace(/[()]/g,"");
+  const sign = s[0]==="-" ? -1 : 1;
+  if(s[0]==="+"||s[0]==="-") s=s.slice(1);
+  const VARP="((?:[a-z](?:\\^?\\d+)?)*)";
+  let num=null, vars=null;
+  /* 3/4x — the fraction written first */
+  let m=s.match(new RegExp("^(\\d+)\\/(\\d+)"+VARP+"$"));
+  if(m){ if(+m[2]===0) return null; num=R(+m[1],+m[2]); vars=m[3]; }
+  if(num===null){
+    /* 5x, x, 5, 0.5x, and 5x/2 — a division written after the letters */
+    m=s.match(new RegExp("^(\\d+(?:\\.\\d+)?)?"+VARP+"(?:\\/(\\d+))?$"));
+    if(!m) return null;
+    if(m[1]===undefined && m[2]==="") return null;
+    if(m[1]===undefined) num=R(1);
+    else if(m[1].indexOf(".")>=0){
+      const dp=m[1].split(".")[1].length, pw=Math.pow(10,dp);
+      num=R(Math.round(parseFloat(m[1])*pw), pw);
+    }
+    else num=R(+m[1]);
+    if(m[3]!==undefined){ if(+m[3]===0) return null; num=R(num.n, num.d*(+m[3])); }
+    vars=m[2];
+  }
+  const vs=[], re=/([a-z])(?:\^?(\d+))?/g;
+  let g;
+  while((g=re.exec(vars))) vs.push(V(g[1], g[2]?+g[2]:1));
+  return T(sign<0?rNeg(num):num, vs);
+}
+function hasSign(raw){
+  return /^\s*[+\-\u2212\u2013\u2014]/.test(String(raw===null||raw===undefined?"":raw));
+}
+/* a group that came to nothing is nothing however it is written: 0 and 0x are
+   the same claim, and neither needs a sign in front of it */
+function sameTerm(q,t){
+  if(!q) return false;
+  if(rZero(t.c)) return rZero(q.c);
+  return rEq(q.c,t.c) && vsKey(q.vs)===vsKey(t.vs);
+}
+function termAt(raw,t,i){
+  if(!sameTerm(parseTerm(raw),t)) return false;
+  if(rZero(t.c)) return true;
+  return i===0 || hasSign(raw);
+}
+function signGap(raw,t,i){
+  return i>0 && !rZero(t.c) && !hasSign(raw) && sameTerm(parseTerm(raw),t);
+}
+
+/* ============ problem generation ============
+   Every kind is built family by family: decide what each family holds, draw the
+   numbers, then deal the terms out so that like terms are never left sitting
+   next to each other. A family that comes to nothing is thrown back everywhere
+   except the one kind that exists to teach it. */
+const VARS=["x","y","n","m","k","t","w","p","r","a","b","c"];
+function twoVars(){
+  const a=pick(VARS); let b=pick(VARS);
+  while(b===a) b=pick(VARS);
+  return [a,b].sort();
+}
+function coefs(n,negFirstP){
+  const out=[];
+  for(let i=0;i<n;i++) out.push(rint(1,9)*sgn(i===0?(negFirstP===undefined?0.38:negFirstP):0.5));
+  return out;
+}
+function ints(list,vs){ return list.map(function(c){ return Ti(c,vs); }); }
+
+/* like terms are only worth spotting when they are not already side by side, so
+   the terms are dealt one family at a time, never twice from the same pile in a
+   row while another pile still has cards in it */
+function interleave(groups){
+  const piles=shuffle(groups).map(function(g){ return shuffle(g); });
+  const out=[];
+  let last=-1;
+  while(piles.some(function(p){return p.length;})){
+    let n=-1, cand=[];
+    for(let i=0;i<piles.length;i++){
+      if(!piles[i].length) continue;
+      if(i===last && piles.some(function(p,j){ return j!==i && p.length; })) continue;
+      if(piles[i].length>n){ n=piles[i].length; cand=[i]; }
+      else if(piles[i].length===n) cand.push(i);
+    }
+    if(!cand.length) return null;
+    const best=cand[Math.floor(Math.random()*cand.length)];
+    out.push(piles[best].shift());
+    last=best;
+  }
+  return out;
+}
+
+function buildFamilies(terms){
+  const fams=[], seen={};
+  terms.forEach(function(t,i){
+    const k=famKey(t);
+    if(seen[k]===undefined){
+      seen[k]=fams.length;
+      fams.push({k:k, vs:t.vs, idx:[i], sum:t.c});
+    } else {
+      const f=fams[seen[k]];
+      f.idx.push(i); f.sum=rAdd(f.sum,t.c);
+    }
+  });
+  fams.forEach(function(f){ f.term=T(f.sum, f.vs); });
+  return fams;
+}
+
+/* Where the difficulty of this topic actually lives is the signs, so a draw has
+   to earn its place: plenty of minuses, spread across the piles rather than
+   heaped in one, and at least one group whose total comes out negative — so the
+   answer itself has a minus to be written, not just the working. */
+function enoughMinuses(terms,fams){
+  const negs=terms.filter(function(t){ return rNegQ(t.c); }).length;
+  if(negs < Math.max(2, Math.ceil(terms.length/3))) return false;
+  if(fams.length>=2){
+    const spread=fams.filter(function(f){
+      return f.idx.some(function(i){ return rNegQ(terms[i].c); });
+    }).length;
+    if(spread<2) return false;
+  }
+  /* a negative in the answer is wanted often but not always: if every answer
+     had one, the sign would stop being a thing worth working out */
+  const live=fams.filter(function(f){ return !rZero(f.sum); });
+  if(Math.random()<0.3 && live.length>=2
+     && !live.some(function(f){ return rNegQ(f.sum); })) return false;
+  return true;
+}
+function assemble(groups,opt){
+  opt=opt||{};
+  const terms=interleave(groups);
+  if(!terms) return null;
+  /* a line that opens with a minus is the harder read, so it is worth meeting
+     often — just not every single time */
+  if(rNegQ(terms[0].c) && Math.random()<0.62) return null;
+  const fams=buildFamilies(terms);
+  if(fams.length<2 || fams.length>4) return null;
+  if(fams.some(function(f){ return f.idx.length<2; })) return null;
+  if(!enoughMinuses(terms,fams)) return null;
+  const zeros=fams.filter(function(f){ return rZero(f.sum); }).length;
+  if(opt.zeros===undefined){ if(zeros) return null; }
+  else if(zeros!==opt.zeros || zeros>=fams.length) return null;
+  return {terms:terms, fams:fams};
+}
+/* a value to try the letters at. Each letter is scaled by the bottoms of the
+   fractions it actually carries, so the check comes out whole without making
+   every other letter needlessly large */
+function values(names,terms){
+  const vals={};
+  names.forEach(function(v,i){
+    let L=1;
+    terms.forEach(function(t){
+      if(t.vs.some(function(x){ return x.v===v; })) L=lcm(L,t.c.d);
+    });
+    vals[v]=L*(i?3:2);
+  });
+  return vals;
+}
+
+/* --- one letter and some loose numbers --- */
+function genSimple(){
+  const ltr=pick(VARS);
+  const vs=ints(coefs(Math.random()<0.45?3:2), [V(ltr,1)]);
+  const cs=ints(coefs(Math.random()<0.35?3:2), []);
+  if(!vs.concat(cs).some(function(t){ return rNegQ(t.c); })) return null;
+  const q=assemble([vs,cs]);
+  if(!q) return null;
+  q.vals={}; q.vals[ltr]=rint(2,4);
+  return q;
+}
+
+/* --- two different letters: x and y are not the same pile --- */
+function genTwoVars(){
+  const ab=twoVars(), A=ab[0], B=ab[1];
+  const groups=[ ints(coefs(2),[V(A,1)]), ints(coefs(2),[V(B,1)]) ];
+  if(Math.random()<0.55) groups.push(ints(coefs(2),[]));
+  if(!groups.some(function(g){ return g.some(function(t){ return rNegQ(t.c); }); })) return null;
+  const q=assemble(groups);
+  if(!q) return null;
+  q.vals={}; q.vals[A]=2; q.vals[B]=3;
+  return q;
+}
+
+/* --- the same letter to different powers --- */
+function genPowers(){
+  const ltr=pick(VARS);
+  const groups=[ ints(coefs(2),[V(ltr,2)]), ints(coefs(2),[V(ltr,1)]) ];
+  if(Math.random()<0.5) groups.push(ints(coefs(2),[]));
+  if(!groups.some(function(g){ return g.some(function(t){ return rNegQ(t.c); }); })) return null;
+  const q=assemble(groups);
+  if(!q) return null;
+  q.vals={}; q.vals[ltr]=rint(2,3);
+  return q;
+}
+
+/* --- xy is a third thing, not an x and not a y ---
+   The two letters are given different values in the check, so a student who
+   gathered xy in with x would not have been saved by the numbers agreeing. */
+function genProducts(){
+  const ab=twoVars(), A=ab[0], B=ab[1];
+  const groups=[ ints(coefs(2),[V(A,1),V(B,1)]) ];
+  const extra=shuffle([[V(A,1)],[V(B,1)],[]]);
+  const many=Math.random()<0.5?2:1;
+  for(let i=0;i<many;i++) groups.push(ints(coefs(2),extra[i]));
+  if(Math.random()<0.25) groups[0]=ints(coefs(3),[V(A,1),V(B,1)]);
+  if(!groups.some(function(g){ return g.some(function(t){ return rNegQ(t.c); }); })) return null;
+  const q=assemble(groups);
+  if(!q) return null;
+  q.vals={}; q.vals[A]=2; q.vals[B]=3;
+  return q;
+}
+
+/* --- fractions in front ---
+   Most of the time every fraction in a group is over the same bottom number, so
+   the work is adding the tops and nothing else. Now and then one bottom is a
+   multiple of the other — halves against quarters, thirds against sixths — which
+   is one easy conversion rather than a hunt for a common denominator. The loose
+   numbers stay whole, so the fraction work is all in one place. */
+function fracPile(vs,n){
+  const d=pick([2,3,4]);
+  const tops={2:[1],3:[1,2],4:[1,3]}[d];
+  /* the second bottom is always a multiple of the first, never a stranger, and
+     never past sixths — halves against quarters, thirds against sixths */
+  const mixed = (d<4 && Math.random()<0.22) ? d*2 : 0;
+  const out=[];
+  for(let i=0;i<n;i++){
+    const dd = (mixed && i) ? mixed : d;
+    const num = dd===d ? pick(tops) : rint(1,dd-1);
+    if(gcd(num,dd)!==1) return null;
+    const c=R(num,dd);
+    out.push(T(sgn(i===0?0.35:0.5)<0?rNeg(c):c, vs));
+  }
+  return out;
+}
+function genFractions(){
+  const ltr=pick(VARS);
+  const vs=fracPile([V(ltr,1)], Math.random()<0.25?3:2);
+  if(!vs) return null;
+  const cs=ints(coefs(2),[]);
+  const q=assemble([vs,cs]);
+  if(!q) return null;
+  const f=q.fams.filter(function(x){ return x.vs.length; })[0];
+  /* nothing uglier than the pieces it was made from */
+  if(f.sum.d>8 || Math.abs(f.sum.n)>12) return null;
+  q.vals=values([ltr],q.terms);
+  return q;
+}
+
+/* --- a group that comes to nothing ---
+   The pile is gathered like any other and the box takes a 0. What that 0 means
+   is the lesson: no x at all, so nothing of it is left in the answer. */
+function zeroPile(vs){
+  if(Math.random()<0.55){
+    const a=rint(2,9);
+    return [Ti(a,vs), Ti(-a,vs)];
+  }
+  const a=rint(1,5), b=rint(1,4);
+  return [Ti(a,vs), Ti(b,vs), Ti(-(a+b),vs)];
+}
+function genCancel(){
+  const ltr=pick(VARS);
+  const shape=Math.random();
+  let groups;
+  if(shape<0.4){
+    /* the letters cancel and the numbers are left */
+    groups=[ zeroPile([V(ltr,1)]), ints(coefs(2),[]) ];
+  } else if(shape<0.7){
+    /* the numbers cancel and the letters are left */
+    groups=[ ints(coefs(2),[V(ltr,1)]), zeroPile([]) ];
+  } else {
+    /* one of two letter families cancels */
+    const ab=twoVars();
+    groups=[ zeroPile([V(ab[0],1)]), ints(coefs(2),[V(ab[1],1)]), ints(coefs(2),[]) ];
+    if(Math.random()<0.5) groups=[ zeroPile([V(ab[0],2)]), ints(coefs(2),[V(ab[0],1)]) ];
+  }
+  const q=assemble(groups,{zeros:1});
+  if(!q) return null;
+  const names=[];
+  q.terms.forEach(function(t){ t.vs.forEach(function(x){ if(names.indexOf(x.v)<0) names.push(x.v); }); });
+  q.vals={}; names.forEach(function(v,i){ q.vals[v]=i?3:2; });
+  return q;
+}
+
+/* --- brackets ---
+   The number outside multiplies both terms inside, and when the bracket is
+   being taken away the minus reaches both of them. That is the whole of the
+   difficulty, so the generator makes sure it comes up. */
+function bracket(ltr){
+  const k=rint(2,5), a=Math.random()<0.4?1:rint(2,4), b=rint(1,9);
+  return {k:k, a:a, b:b, s:1, bs:sgn(0.55), V:ltr};
+}
+function brTerms(br){
+  return [ Ti(br.s*br.k*br.a,[V(br.V,1)]), Ti(br.s*br.bs*br.k*br.b,[]) ];
+}
+/* a bare equation is handed back as display tokens; the ones that are brackets
+   are opened out into the flat list of terms the rest of the drill works on */
+function layout(disp){
+  const terms=[], exp=[];
+  disp.forEach(function(d){
+    if(d.br){ brTerms(d.br).forEach(function(t){ exp.push(terms.length); terms.push(t); }); }
+    else terms.push(d);
+  });
+  return {terms:terms, exp:exp};
+}
+function bracketProblem(disp,vals){
+  const L=layout(disp);
+  const fams=buildFamilies(L.terms);
+  if(fams.length<2 || fams.length>4) return null;
+  if(fams.some(function(f){ return f.idx.length<2 || rZero(f.sum); })) return null;
+  if(L.terms.some(function(t){ return Math.abs(t.c.n)>60; })) return null;
+  if(!enoughMinuses(L.terms,fams)) return null;
+  /* the same restraint about opening on a minus, for the kinds that build their
+     line out of brackets rather than through assemble */
+  const head=disp[0].br ? disp[0].br.s<0 : rNegQ(disp[0].c);
+  if(head && Math.random()<0.5) return null;
+  return {terms:L.terms, fams:fams, disp:disp, exp:L.exp, vals:vals};
+}
+
+function genBrackets(){
+  const ltr=pick(VARS);
+  const br=bracket(ltr);
+  br.s=sgn(0.62);
+  const outV=Ti(rint(1,9)*sgn(0.4),[V(ltr,1)]);
+  const outC=Ti(rint(1,9)*sgn(0.5),[]);
+  /* the bracket sits second or third, never first: a line that opens with a
+     bracket hides the sign question this kind exists to ask */
+  const cFirst=Math.random()<0.5;
+  const disp=(cFirst?[outV,outC]:[outV]).concat([{br:br}]).concat(cFirst?[]:[outC]);
+  const vals={}; vals[ltr]=rint(2,4);
+  return bracketProblem(disp,vals);
+}
+
+/* --- two brackets, the second usually taken away --- */
+function genDouble(){
+  const ltr=pick(VARS);
+  const b1=bracket(ltr), b2=bracket(ltr);
+  b1.s=sgn(0.22); b2.s=sgn(0.7);
+  const disp=[{br:b1},{br:b2}];
+  if(Math.random()<0.45) disp.push(Ti(rint(1,9)*sgn(0.5),[]));
+  else if(Math.random()<0.4) disp.push(Ti(rint(1,6)*sgn(0.5),[V(ltr,1)]));
+  const vals={}; vals[ltr]=rint(2,4);
+  const q=bracketProblem(disp,vals);
+  if(!q) return null;
+  /* two brackets that expand to the same numbers make the gathering trivial */
+  if(q.terms[0].c.n===q.terms[2].c.n && q.terms[1].c.n===q.terms[3].c.n) return null;
+  return q;
+}
+
+/* --- several of these at once ---
+   Families are chosen first, then any of them may be made fractional or made to
+   cancel, and last of all a bracket may be folded back over two of the terms.
+   Folding rather than expanding is what keeps it honest: the bracket is built
+   out of terms that are already in the expression, so multiplying it out has to
+   give them back exactly. */
+function foldBracket(q){
+  const plainVar=function(t){ return t.vs.length===1 && t.vs[0].p===1 && t.c.d===1; };
+  const plainNum=function(t){ return !t.vs.length && t.c.d===1; };
+  const cand=[];
+  for(let i=0;i+1<q.terms.length;i++){
+    const a=q.terms[i], b=q.terms[i+1];
+    let swap=false;
+    if(plainVar(a) && plainNum(b)) swap=false;
+    else if(plainNum(a) && plainVar(b)){
+      /* a bracket is written k(ax + b), so the letter has to come first. The
+         pair can be swapped to manage it, but not if that would leave two like
+         terms sitting next to each other */
+      if(i>0 && famKey(q.terms[i-1])===famKey(a)) continue;
+      if(i+2<q.terms.length && famKey(q.terms[i+2])===famKey(b)) continue;
+      swap=true;
+    }
+    else continue;
+    const k=gcd(a.c.n,b.c.n);
+    if(k<2) continue;
+    cand.push({i:i, k:k, swap:swap});
+  }
+  if(!cand.length) return null;
+  const c=pick(cand), i=c.i, k=c.k;
+  if(c.swap){
+    const t=q.terms[i]; q.terms[i]=q.terms[i+1]; q.terms[i+1]=t;
+    q.fams=buildFamilies(q.terms);
+  }
+  const a=q.terms[i], b=q.terms[i+1];
+  const s=a.c.n<0 ? -1 : 1;
+  const br={k:k, a:Math.abs(a.c.n)/k, b:Math.abs(b.c.n)/k, s:s,
+            bs:(s*b.c.n<0?-1:1), V:a.vs[0].v};
+  const made=brTerms(br);
+  if(!rEq(made[0].c,a.c) || !rEq(made[1].c,b.c)) return null;
+  q.disp=q.terms.slice(0,i).concat([{br:br}]).concat(q.terms.slice(i+2));
+  q.exp=[i,i+1];
+  return q;
+}
+function genEverything(){
+  const ab=twoVars(), A=ab[0], B=ab[1];
+  const style=Math.random();
+  let shapes;
+  if(style<0.20)      shapes=[[V(A,1),V(B,1)],[V(A,1)],[]];   /* xy, x, numbers */
+  else if(style<0.45) shapes=[[V(A,2)],[V(A,1)],[]];          /* squares, x, numbers */
+  else if(style<0.85) shapes=[[V(A,1)],[V(B,1)],[]];          /* two letters, numbers */
+  else                shapes=[[V(A,1),V(B,1)],[V(A,1)],[V(B,1)]];
+  if(Math.random()<0.3) shapes=shapes.slice(0,2);
+
+  const plain=shapes.map(function(vs,i){ return i; }).filter(function(i){
+    /* a fraction sitting on a squared letter makes the check ugly for no extra
+       lesson, so fractions go on plain letters only */
+    return shapes[i].length===1 && shapes[i][0].p===1;
+  });
+  const wide = shapes.some(function(vs){ return vs.length>1; });
+  const fracAt = (plain.length && !wide && Math.random()<0.55) ? pick(plain) : -1;
+  const zeroAt = Math.random()<0.38 ? Math.floor(Math.random()*shapes.length) : -1;
+  const wantBr = Math.random()<0.42;
+  if(zeroAt>=0 && shapes.length<2) return null;
+
+  const groups=[];
+  for(let i=0;i<shapes.length;i++){
+    let g;
+    if(i===zeroAt && i===fracAt){
+      const f=fracPile(shapes[i],1);
+      if(!f) return null;
+      g=[f[0], T(rNeg(f[0].c), shapes[i])];
+    }
+    else if(i===zeroAt) g=zeroPile(shapes[i]);
+    else if(i===fracAt) g=fracPile(shapes[i],2);
+    else g=ints(coefs(2),shapes[i]);
+    if(!g) return null;
+    groups.push(g);
+  }
+  const q=assemble(groups, zeroAt>=0?{zeros:1}:undefined);
+  if(!q) return null;
+  const f=q.fams.filter(function(x){ return x.sum.d>1; })[0];
+  if(f && (f.sum.d>8 || Math.abs(f.sum.n)>12)) return null;
+
+  const names=[];
+  q.terms.forEach(function(t){ t.vs.forEach(function(x){ if(names.indexOf(x.v)<0) names.push(x.v); }); });
+  names.sort();
+  q.vals=values(names,q.terms);
+  /* a squared letter times a common denominator gets big fast */
+  if(q.terms.some(function(t){ return t.vs.some(function(x){ return x.p>1; }); })){
+    let big=false;
+    names.forEach(function(v){ if(q.vals[v]>3) big=true; });
+    if(big) return null;
+  }
+  /* the check has to stay a number a person would read rather than compute */
+  let worth=R(0);
+  q.terms.forEach(function(t){
+    let v=R(1);
+    t.vs.forEach(function(x){ v=rMul(v,R(Math.pow(q.vals[x.v],x.p))); });
+    worth=rAdd(worth,rMul(t.c,v));
+  });
+  if(Math.abs(worth.n)>300) return null;
+  /* when a bracket is wanted, the draw is thrown back until one can be folded,
+     rather than quietly settling for a problem without one */
+  if(wantBr){ if(!foldBracket(q)) return null; }
+  else if(Math.random()<0.12) foldBracket(q);
+  /* the tab is called Everything: a draw that turned out plain is not it */
+  const feats=((q.exp&&q.exp.length)?1:0)+(fracAt>=0?1:0)+(zeroAt>=0?1:0)
+            + (shapes.some(function(vs){return vs.length>1;})?1:0)
+            + (shapes.some(function(vs){return vs.some(function(x){return x.p>1;});})?1:0);
+  if(!feats) return null;
+  return q;
+}
+
+const GEN={simple:genSimple, twovars:genTwoVars, powers:genPowers, products:genProducts,
+           brackets:genBrackets, double:genDouble, fractions:genFractions, cancel:genCancel,
+           everything:genEverything};
+
+function genProblem(fl){
+  const f=GEN[fl]||genSimple;
+  for(let i=0;i<900;i++){ const q=f(); if(q) return finish(q); }
+  /* 7x + 3 - 2x + 5, in case a run of draws all fall foul of the checks above */
+  const terms=[Ti(7,[V("x",1)]),Ti(3,[]),Ti(-2,[V("x",1)]),Ti(5,[])];
+  return finish({terms:terms, fams:buildFamilies(terms), vals:{x:3}});
+}
+function finish(q){
+  if(!q.disp) q.disp=q.terms.slice();
+  if(!q.exp) q.exp=[];
+  q.steps=[];
+  if(q.exp.length) q.steps.push("expand");
+  q.steps.push("work","done","check");
+  return q;
+}
+
+/* ============ state ============
+   Groups are made by the student, not by the page: the first term clicked opens
+   a group, and its family decides what else may join. They are kept in the order
+   they were picked, and that order is the order the answer is written in — which
+   is honest, because addition does not care. */
+const S={
+  p:null, fl:"simple", si:0, phase:"work",
+  tag:[], groups:[], cur:-1, expIn:[], ansIn:"", gone:{}, zap:-1,
+  miss:"", note:"", hint:false, clean:true, firstId:null, shakeI:-1
+};
+const clearTimers=Shell.clearTimers, later=Shell.later;
+
+function idxOf(ph){ return S.p.steps.indexOf(ph); }
+function at(ph){ const i=idxOf(ph); return i>=0 && S.si>=i; }
+function lean(){ return Shell.lean(); }
+
+/* ---- the groups the student has made ---- */
+function famIndexOf(i){
+  const k=famKey(S.p.terms[i]);
+  for(let f=0;f<S.p.fams.length;f++) if(S.p.fams[f].k===k) return f;
+  return -1;
+}
+function taggedAt(i){ return S.tag[i]!==null && S.tag[i]!==undefined; }
+function grpFam(g){ return S.p.fams[S.groups[g].fi]; }
+function groupFull(g){
+  if(g<0 || !S.groups[g]) return false;
+  return grpFam(g).idx.every(function(i){ return S.tag[i]===g; });
+}
+function awaiting(){ return S.cur>=0 && groupFull(S.cur); }
+/* a group whose terms come to nothing is not asked for a total. There is no
+   term to write, so writing one would be a fiction; the pair simply goes */
+function cancels(g){ return g>=0 && !!S.groups[g] && rZero(grpFam(g).sum); }
+function picked(g){ return grpFam(g).idx.filter(function(i){ return S.tag[i]===g; }); }
+function ungrouped(){
+  return S.tag.filter(function(t){ return t===null || t===undefined; }).length;
+}
+function allDone(){
+  return ungrouped()===0 && S.groups.every(function(g){ return g.done; });
+}
+function curTerm(){ return S.cur<0 ? null : grpFam(S.cur).term; }
+/* a group that came to nothing writes nothing, so it takes no place in the
+   answer and the group after it is still the one that needs no sign */
+function ansIndex(g){
+  let n=0;
+  for(let i=0;i<g;i++){
+    if(S.groups[i].done && !rZero(S.p.fams[S.groups[i].fi].term.c)) n++;
+  }
+  return n;
+}
+function sumOK(){ return S.cur>=0 && termAt(S.ansIn, curTerm(), ansIndex(S.cur)); }
+function answerTerms(){
+  return S.groups.filter(function(g){ return g.done; })
+    .map(function(g){ return S.p.fams[g.fi].term; })
+    .filter(function(t){ return !rZero(t.c); });
+}
+
+/* ============ small rendering pieces ============ */
+function boxHTML(id,val,extra){
+  return '<input id="'+id+'" class="box'+(extra||"")+'" value="'+esc(val)
+       + '" autocomplete="off" spellcheck="false" inputmode="text">';
+}
+function chip(inner,cls,attrs){
+  return '<span class="tm'+(cls?" "+cls:"")+'"'+(attrs||"")+'>'+inner+'</span>';
+}
+function brChip(br,first){
+  const o = br.s<0 ? MINUS : (first?"":"+");
+  const inner=Ti(br.a,[V(br.V,1)]), num=Ti(br.bs*br.b,[]);
+  return chip(
+    (o?'<span class="op">'+o+'</span>':"")
+    + '<span class="brk">'+br.k
+    + '<span class="paren">(</span>'
+    + termStr(inner,true)+termStr(num,false)
+    + '<span class="paren">)</span></span>', "");
+}
+
+/* the line as it is first written, brackets and all */
+function dispLine(cls){
+  const parts=S.p.disp.map(function(d,i){
+    return d.br ? brChip(d.br,i===0) : chip(termStr(d,i===0),"");
+  });
+  return '<div class="line '+(cls||"")+'">'+parts.join("")+'</div>';
+}
+
+/* the working line: every term written out flat, coloured as it is claimed. A
+   term already used up by a finished group is faded, so what is left to pick is
+   always the part of the line still in full ink */
+/* which terms are still on the line: a cancelled group leaves it altogether,
+   and the ones after it shuffle up, so the first term standing is written the
+   way a first term is written */
+function onLine(){
+  return S.p.terms.map(function(t,i){ return i; }).filter(function(i){
+    const g=S.tag[i];
+    return !(g!==null && g!==undefined && S.gone[g]);
+  });
+}
+function flatLine(opts){
+  const p=S.p, o=opts||{};
+  const parts=onLine().map(function(i,pos){
+    const t=p.terms[i], bx=p.exp.indexOf(i);
+    if(o.boxes && bx>=0){
+      const ok=termAt(S.expIn[bx], t, i===0?0:1);
+      return boxHTML("e"+bx, S.expIn[bx]||"", " term"+(ok?" ok":""));
+    }
+    const g=S.tag[i], has=taggedAt(i);
+    const used = has && S.groups[g] && S.groups[g].done;
+    const live = o.pick && !has;
+    let cls="";
+    if(has) cls="t"+(g%4)+" grow"+(used?" dim":"");
+    if(has && g===S.zap) cls+=" zap";
+    if(live) cls+=" pick";
+    if(i===S.shakeI) cls+=" shake";
+    if(o.fresh && bx>=0) cls+=" grow";
+    const attrs = live ? ' data-i="'+i+'" role="button" tabindex="0"' : "";
+    return chip(termStr(t,pos===0),cls,attrs);
+  });
+  return '<div class="line'+(o.quiet?" quiet":"")+'">'+parts.join("")+'</div>';
+}
+
+/* the group in hand, gathered onto its own line in the order it was picked. The
+   box turns up only once every term of that family has been collected, which is
+   how the page says "that is all of them" without counting them out */
+function workLine(){
+  if(S.cur<0) return "";
+  const g=S.cur, list=picked(g);
+  if(!list.length) return "";
+  const zap = g===S.zap;
+  const inner=list.map(function(ti,j){
+    return chip(termStr(S.p.terms[ti], j===0), "t"+(g%4)+" grow"+(zap?" zap":""));
+  }).join("");
+  let h='<div class="line work">'+inner;
+  if(groupFull(g)){
+    if(cancels(g)){
+      h+='<span class="eqs">=</span>'+chip("0","t"+(g%4)+(zap?" zap":""));
+    } else {
+      h+='<span class="eqs">=</span>'
+       + boxHTML("sum", S.ansIn, " term"+(sumOK()?" ok":" g"+(g%4)));
+    }
+  } else {
+    h+='<span class="waiting">&hellip; any more?</span>';
+  }
+  return h+'</div>';
+}
+
+/* the answer, built one group at a time as each total is written. A group that
+   came to nothing never reaches it — the student watched that pair go */
+function answerLine(){
+  const ans=answerTerms();
+  if(!ans.length) return "";
+  return '<div class="line answer">'
+    + ans.map(function(t,i){ return chip(termStr(t,i===0),""); }).join("")
+    + '</div>';
+}
+
+function buildRows(){
+  const p=S.p, rows=[], live=(S.phase==="work"), pk=live && !awaiting() && S.zap<0;
+  if(p.exp.length){
+    rows.push(dispLine(at("work")?"quiet":""));
+    if(at("expand")) rows.push(flatLine({boxes:S.phase==="expand", pick:pk,
+                                         fresh:S.phase==="expand"}));
+  } else {
+    rows.push(flatLine({pick:pk}));
+  }
+  if(live){ const w=workLine(); if(w) rows.push(w); }
+  const a=answerLine(); if(a) rows.push(a);
+  return rows;
+}
+function renderEquation(){
+  document.getElementById("eq").innerHTML = buildRows().join("");
+}
+
+/* ============ the check ============
+   A number goes in for each letter on both lines. They come to the same total,
+   because gathering like terms rewrites an expression without changing what it
+   is worth — which is the only reason the move is allowed at all. */
+function subTerm(t,first){
+  const o=opStr(t,first), a=rAbs(t.c);
+  let body;
+  if(!t.vs.length) body=rHTML(a);
+  else {
+    const vals=t.vs.map(function(x){
+      return '<span class="val">('+S.p.vals[x.v]+')</span>'+(x.p>1?"<sup>"+x.p+"</sup>":"");
+    }).join("");
+    body=(rOne(a)?"":rHTML(a))+vals;
+  }
+  return (o?o+" ":"")+body+" ";
+}
+function evalTerms(list){
+  let acc=R(0);
+  list.forEach(function(t){
+    let v=R(1);
+    t.vs.forEach(function(x){ v=rMul(v, R(Math.pow(S.p.vals[x.v], x.p))); });
+    acc=rAdd(acc, rMul(t.c, v));
+  });
+  return acc;
+}
+function checkHTML(){
+  const p=S.p;
+  const a=p.terms.map(function(t,i){ return subTerm(t,i===0); }).join("");
+  const ans=answerTerms();
+  const b=ans.length ? ans.map(function(t,i){ return subTerm(t,i===0); }).join("") : "0 ";
+  const v=rHTML(evalTerms(p.terms));
+  return '<div class="checkline"><div class="orig">'+a+'= '+v+'</div>'
+       + '<div class="sub">'+b+'= '+v+' <span class="green">&#10003;</span></div></div>';
+}
+function renderPanel(){
+  const el=document.getElementById("panel");
+  el.innerHTML = S.phase==="check" ? checkHTML() : "";
+}
+
+/* ============ the prompt ============ */
+function pill(txt){ return '<div class="tagline"><span class="tag">'+txt+'</span></div>'; }
+function M(s){ return '<span class="math">'+s+'</span>'; }
+/* the numbers in front of one family, written as the sum they are. Not the
+   terms: writing 7 + 5w + 3w = 15 would be doing the very thing being unpicked */
+function coefSum(f){
+  return f.idx.map(function(i,j){
+    const c=S.p.terms[i].c;
+    return j ? ((rNegQ(c)?MINUS:"+")+" "+rTxt(rAbs(c))) : rTxt(c);
+  }).join(" ");
+}
+function likeRule(){
+  return 'Terms are alike when they carry exactly the same letters, each to exactly the same '
+       + 'power &mdash; or no letters at all. The number in front can be anything.';
+}
+function fracHint(f){
+  const ds=[]; f.idx.forEach(function(i){ const d=S.p.terms[i].c.d; if(d>1 && ds.indexOf(d)<0) ds.push(d); });
+  if(!ds.length) return "";
+  let L=1; ds.forEach(function(d){ L=lcm(L,d); });
+  return 'Put them over a common bottom of '+L+' and add the tops: ';
+}
+
+function renderPrompt(){
+  const el=document.getElementById("promptbar"), p=S.p;
+  const hintBtn='<button class="link" id="hintBtn">'+(S.hint?"Hide hint":"Hint")+'</button>';
+  const ph=S.phase;
+  let h="";
+
+  if(ph==="expand"){
+    const many=p.exp.length>2;
+    h='<div class="prompt">'+pill(many?"Multiply out both brackets":"Multiply out the bracket")
+      + '<span>'+(lean()
+          ? 'Multiply through, sign and all.'
+          : 'The number outside multiplies <strong>both</strong> terms inside'
+            + (many?', and that goes for each bracket in turn':'')
+            + '. Write each result in full, sign and all.')+'</span>'+hintBtn;
+    if(S.hint){
+      const bits=[];
+      p.disp.forEach(function(d){
+        if(!d.br) return;
+        const t=brTerms(d.br);
+        bits.push(M(d.br.k+" "+TIMES+" "+bodyStr(Ti(d.br.a,[V(d.br.V,1)])))+" and "
+                + M(d.br.k+" "+TIMES+" "+d.br.b)+" give "
+                + M(plainTerm(t[0])+" "+termText(t[1],false)));
+      });
+      const neg=p.disp.some(function(d){ return d.br && d.br.s<0; });
+      h+='<div class="hintline">'+bits.join("; ")+'. '
+        + (neg?'A bracket that is being taken away hands its minus to <strong>both</strong> terms inside &mdash; every sign in there flips.':'')
+        + '</div>';
+    }
+    h+='</div>';
+  }
+  else if(ph==="work" && S.zap>=0){
+    const f=grpFam(S.zap);
+    h='<div class="prompt">'+pill("They cancel")
+      + '<span>'+M(coefSum(f))+' = '+M("0")
+      + (f.vs.length ? ', so there is no '+M(vsHTML(f.vs))+' left to write down' : '')
+      + '. Off they go.</span></div>';
+  }
+  else if(ph==="work" && awaiting()){
+    const f=grpFam(S.cur), t=curTerm(), n=ansIndex(S.cur);
+    h='<div class="prompt">'+pill("Add them up")
+      + '<span>'+(lean()
+          ? 'Add the numbers in front, keeping every sign.'
+          : (f.vs.length
+              ? 'The letters match, so they line up and drop out. Add the numbers in front '
+                + '&mdash; '+M(coefSum(f))+' &mdash; then put '+M(vsHTML(f.vs))+' back on the end.'
+              : 'Add them: '+M(coefSum(f))+'.'))
+        + (n && !lean() ? ' It follows a term, so write its + or '+MINUS+' too.' : '')+'</span>'
+      + hintBtn;
+    if(S.hint){
+      const lead=fracHint(f);
+      h+='<div class="hintline">'+lead+M(coefSum(f))+' = '+M(rTxt(f.sum))
+        + (rZero(f.sum)
+            ? ', and none of '+M(vsHTML(f.vs)||"those numbers")+' is left at all. Write '+M("0")+'.'
+            : (f.vs.length ? ', so this group comes to '+M(signedBody(t))+'.' : '.'))
+        + (rZero(f.sum) ? ''
+           : (n ? ' Type it as '+M((rNegQ(t.c)?MINUS:"+")+bodyStr(t))+' &mdash; the sign is part of what goes in the box.'
+                : ' Type the whole term into the box.'))+'</div>';
+    }
+    h+='</div>';
+  }
+  else if(ph==="work" && S.cur>=0){
+    const anchor=S.p.terms[picked(S.cur)[0]];
+    h='<div class="prompt">'+pill("Gather like terms")
+      + '<span>'+(lean()
+          ? 'Anything else like '+M(bodyStr(anchor))+'?'
+          : 'Keep going &mdash; every other term like '+M(bodyStr(anchor))
+            + ' belongs in this group. The box turns up once you have them all.')+'</span>'+hintBtn;
+    if(S.hint) h+='<div class="hintline">'+likeRule()+'</div>';
+    h+='</div>';
+  }
+  else if(ph==="work"){
+    const left=ungrouped();
+    h='<div class="prompt">'+pill("Gather like terms")
+      + '<span>'+(lean()
+          ? 'Pick a term, then all its like terms.'
+          : 'Click any term, then every other term that is like it. '
+            + 'The groups can be taken in whatever order you like.')+'</span>'
+      + '<span class="count">'+left+' term'+(left===1?"":"s")+' still to group</span>'+hintBtn;
+    if(S.hint) h+='<div class="hintline">'+likeRule()+'</div>';
+    h+='</div>';
+  }
+  else if(ph==="done"){
+    const n=answerTerms().length;
+    h='<div class="prompt">'+pill("Simplified")
+      + '<span>'+(n ? p.terms.length+' terms became '+n+(n===1?' term':' terms')
+                    : 'Every group cancelled: the whole thing comes to nothing')+'.</span></div>';
+  }
+  else if(ph==="check"){
+    const v=p.vals, names=Object.keys(v).sort();
+    const sub=names.map(function(n){ return n+" = "+v[n]; });
+    h='<div class="prompt">'+pill("Check")
+      + '<span>Put '+M(listWords(sub))+' into both lines and they come to the same number. '
+      + 'Combining like terms changes how it is written, never what it is worth.</span>'
+      + '<button class="next" id="nextBtn">Next</button></div>';
+  }
+
+  if(S.miss) h+='<div class="missline">'+S.miss+'</div>';
+  else if(S.note) h+='<div class="noteline">'+S.note+'</div>';
+  if(ph!=="check" && ph!=="done")
+    h+='<div class="skipwrap"><button class="link" id="skipBtn">Skip</button></div>';
+  el.innerHTML=h;
+}
+
+function render(){
+  Shell.head(Shell.active); renderEquation(); renderPanel(); renderPrompt(); attach();
+  Shell.applyScale(); focusFirst();
+}
+function focusFirst(){
+  later(60,function(){
+    const el=S.firstId && document.getElementById(S.firstId);
+    if(el) el.focus();
+  });
+}
+
+/* ============ flow ============ */
+function setPhase(ph){
+  clearTimers();
+  const i=idxOf(ph);
+  if(i<0) return;
+  S.si=i; S.phase=ph; S.miss=""; S.shakeI=-1;
+  S.firstId = ph==="expand" ? firstEmptyExpand() : null;
+  render();
+  if(ph==="done") later(1000,function(){ setPhase("check"); });
+}
+function advance(){ setPhase(S.p.steps[S.si+1]); }
+function finishProblem(){ Shell.solved(S.clean); setPhase("done"); }
+function flagMiss(msg){
+  if(!msg) return;
+  S.clean=false; S.miss=msg; renderPrompt(); attach();
+  later(4200,function(){ S.miss=""; renderPrompt(); attach(); });
+}
+function signNote(t){
+  const ex=plainTerm(T(rAbs(t.c),t.vs));
+  return "That is the right size \u2014 but it is not the first thing on that line, so it needs its "
+    + "sign in front: write +"+ex+" rather than "+ex+", or the term before it runs straight into it.";
+}
+
+/* ============ picking the groups ============ */
+function clickTerm(i){
+  if(S.phase!=="work" || taggedAt(i) || awaiting() || S.zap>=0) return;
+  const fi=famIndexOf(i);
+  S.note="";
+  if(S.cur<0){
+    /* the first term clicked opens a group and sets what may join it */
+    S.groups.push({fi:fi, done:false});
+    S.cur=S.groups.length-1; S.ansIn=""; S.miss="";
+  } else if(S.groups[S.cur].fi!==fi){
+    S.clean=false; S.shakeI=i;
+    renderEquation(); attach();
+    later(360,function(){ S.shakeI=-1; renderEquation(); attach(); });
+    flagMiss(unlikeMsg(S.p.terms[i], S.p.terms[picked(S.cur)[0]]));
+    return;
+  }
+  S.tag[i]=S.cur;
+  if(groupFull(S.cur) && cancels(S.cur)){ vanish(S.cur); return; }
+  S.firstId = groupFull(S.cur) ? "sum" : null;
+  render();
+}
+/* the pair is shown struck through against a 0 for a moment, and then it is
+   off the line entirely. No box: there is no term to write down */
+function vanish(g){
+  S.zap=g; S.firstId=null;
+  render();
+  later(1250,function(){
+    const f=grpFam(g);
+    S.zap=-1; S.groups[g].done=true; S.gone[g]=true;
+    S.note = f.vs.length
+      ? "Those came to 0"+vsTxt(f.vs)+" \u2014 no "+vsTxt(f.vs)+" at all, so they are gone."
+      : "Those numbers came to 0, so they are gone.";
+    S.cur=-1; S.ansIn=""; S.miss="";
+    if(allDone()) finishProblem(); else render();
+  });
+}
+/* the reason two terms are not alike is the lesson, so the nudge names it
+   rather than saying no */
+function unlikeMsg(got,want){
+  const g=M(signedBody(got)), w=M(signedBody(want));
+  if(!got.vs.length && want.vs.length) return g+" has no letter with it, so it cannot join "+w
+    + ". A loose number can only ever be added to another loose number.";
+  if(got.vs.length && !want.vs.length) return g+" carries "+(got.vs.length>1?"letters":"a letter")
+    + ", and "+w+" does not. Adding them would mean claiming to know what "+M(vsHTML(got.vs))
+    + " is worth, and nothing here says.";
+  if(letters(got.vs)!==letters(want.vs)) return g+" and "+w+" are not built from the same letters "
+    + "&mdash; "+M(vsHTML(got.vs))+" against "+M(vsHTML(want.vs))+". A term has to carry exactly the "
+    + "same letters before it can join another, and there is no telling what "
+    + M(vsHTML(got.vs))+" is worth next to "+M(vsHTML(want.vs))+".";
+  return g+" and "+w+" are the same letters raised to different powers. "+M(vsHTML(want.vs))
+    + " and "+M(vsHTML(got.vs))+" are as different as a length and an area \u2014 only exactly "
+    + "matching powers can be gathered.";
+}
+
+/* ============ inputs ============ */
+function firstEmptyExpand(){
+  for(let j=0;j<S.p.exp.length;j++){
+    const i=S.p.exp[j];
+    if(!termAt(S.expIn[j], S.p.terms[i], i===0?0:1)) return "e"+j;
+  }
+  return null;
+}
+function expandDone(){ return firstEmptyExpand()===null; }
+
+function attach(){
+  const hb=document.getElementById("hintBtn");
+  if(hb) hb.onclick=function(){ S.hint=!S.hint; renderPrompt(); attach(); };
+  const sb=document.getElementById("skipBtn"); if(sb) sb.onclick=nextProblem;
+  const nb=document.getElementById("nextBtn"); if(nb) nb.onclick=nextProblem;
+
+  document.querySelectorAll("#eq .tm.pick").forEach(function(el){
+    const i=+el.getAttribute("data-i");
+    el.onclick=function(){ clickTerm(i); };
+    el.onkeydown=function(e){
+      if(e.key==="Enter"||e.key===" "){ e.preventDefault(); clickTerm(i); }
+    };
+  });
+  for(let j=0;j<S.p.exp.length;j++) bind("e"+j,onExpand);
+  bind("sum",onSum);
+}
+function bind(id,handler){
+  const el=document.getElementById(id);
+  if(!el) return;
+  el.oninput=handler;
+  el.onkeydown=function(e){ if(e.key==="Enter"){ e.preventDefault(); flagMiss(missMessage()); } };
+}
+function setCls(el,cls){ if(el && el.className!==cls) el.className=cls; }
+function focusId(id){ const el=document.getElementById(id); if(el) el.focus(); }
+
+function onExpand(e){
+  const j=+e.target.id.slice(1), p=S.p, i=p.exp[j];
+  S.expIn[j]=e.target.value;
+  const ok=termAt(S.expIn[j], p.terms[i], i===0?0:1);
+  setCls(e.target,"box term"+(ok?" ok":""));
+  clearTimers();
+  if(expandDone()){ later(460,function(){ S.hint=false; advance(); }); return; }
+  if(ok){ const nx=firstEmptyExpand(); if(nx) focusId(nx); }
+}
+function onSum(e){
+  if(S.cur<0) return;
+  S.ansIn=e.target.value;
+  const ok=sumOK();
+  setCls(e.target,"box term"+(ok?" ok":" g"+(S.cur%4)));
+  clearTimers();
+  if(!ok) return;
+  later(520,function(){
+    S.hint=false;
+    const f=grpFam(S.cur);
+    S.groups[S.cur].done=true;
+    /* a group that came to nothing is worth a word: the 0 is not an answer of
+       zero, it is the whole family leaving */
+    S.note = rZero(f.sum)
+      ? (f.vs.length
+          ? "That group came to 0"+vsTxt(f.vs)+" \u2014 no "+vsTxt(f.vs)
+            + " at all, so none of it is left in the answer."
+          : "Those numbers came to 0, so nothing of them is left in the answer.")
+      : "";
+    S.cur=-1; S.ansIn=""; S.miss=""; S.firstId=null;
+    if(allDone()) finishProblem(); else render();
+  });
+}
+
+/* ============ what went wrong ============ */
+function missMessage(){
+  const p=S.p, ph=S.phase;
+  if(ph==="expand"){
+    /* Enter pressed on an answer that is already right, in the moment before
+       the page moves on, is not a mistake and must not cost the streak */
+    const id0=firstEmptyExpand();
+    if(!id0) return "";
+    const j=+id0.slice(1), i=p.exp[j], want=p.terms[i];
+    const br=p.disp.filter(function(d){ return d.br; })[Math.floor(j/2)];
+    if(signGap(S.expIn[j],want,1)) return signNote(want);
+    const q=parseTerm(S.expIn[j]);
+    if(q && rEq(q.c,rNeg(want.c))) return "The size is right and the sign is not. That bracket is "
+      + (br && br.s<0 ? "being taken away, so every sign inside it flips"
+                      : "added, so the signs inside it stay as they are")+".";
+    if(br && j%2===1 && q && rEq(rAbs(q.c),R(br.b))) return "That is the number inside the bracket, "
+      + "untouched. The "+br.k+" outside multiplies it too \u2014 both terms, not just the first.";
+    return "Multiply the number outside by each term inside in turn, and write the result with its sign.";
+  }
+  if(ph==="work" && awaiting()){
+    const f=grpFam(S.cur), want=curTerm(), q=parseTerm(S.ansIn), n=ansIndex(S.cur);
+    if(sumOK()) return "";
+    if(signGap(S.ansIn,want,n)) return signNote(want);
+    if(!q) return "Write the whole term: the number, then the letters if the group has any.";
+    if(rZero(want.c)) return "Those cancel out. Add them and see: "+M(coefSum(f))+" = "+M("0")+".";
+    if(rEq(q.c,want.c) && vsKey(q.vs)!==vsKey(want.vs)){
+      if(!q.vs.length) return "The number is right, but the letters have to come with it \u2014 write "
+        + M(signedBody(want))+", not "+M(rTxt(q.c))+".";
+      return "The number is right; the letters or their powers are not. This group gathers "+famName(want)+".";
+    }
+    if(rEq(q.c,rNeg(want.c))) return "The right size, the wrong way round. Add the numbers in front as "
+      + "they stand: "+M(coefSum(f))+" = "+M(rTxt(want.c))+".";
+    let all=R(0);
+    p.terms.forEach(function(t){ all=rAdd(all,t.c); });
+    if(rEq(q.c,all)) return "That is every number on the line added together, including ones from other "
+      + "groups. Only terms that are alike can be added.";
+    if(q.c.d===1 && want.c.d>1) return "The answer is not a whole number. "+M(coefSum(f))
+      + " needs the fractions put over a common bottom before the tops are added.";
+    return "Add the numbers in front of that group, keeping each sign as it stands.";
+  }
+  return "";
+}
+
+/* ============ sizing ============ */
+Shell.onResize=function(){
+  if(Shell.activeEng!==KEY || !S.p) return;
+  fitScale(); render();
+};
+/* the widest the problem will ever be is measured before the first line is
+   drawn, so the writing is sized once and then left alone. Each group takes a
+   turn at being the one in hand, since any of them may be picked first */
+function fitScale(){
+  const room=Shell.room();
+  if(!room.w) return;
+  const save={si:S.si, phase:S.phase, tag:S.tag.slice(), groups:S.groups.slice(),
+              cur:S.cur, ans:S.ansIn, exp:S.expIn.slice(), gone:S.gone, zap:S.zap};
+  S.gone={}; S.zap=-1;
+  S.expIn=S.p.exp.map(function(i){ return bodyStr(S.p.terms[i]); });
+  const n=S.p.fams.length;
+  const pose=function(live){
+    const upto = live<0 ? n-1 : live;
+    S.groups=[];
+    for(let i=0;i<=upto;i++) S.groups.push({fi:i, done: live<0 ? true : i<live});
+    S.cur = live<0 ? -1 : live;
+    S.ansIn = live<0 ? "" : plainTerm(S.p.fams[live].term);
+    S.tag=S.p.terms.map(function(t,i){
+      const fi=famIndexOf(i);
+      return fi<=upto ? fi : null;
+    });
+  };
+  let raw=1;
+  const shot=function(ph,extra){
+    const i=idxOf(ph); if(i<0) return;
+    S.si=i; S.phase=ph;
+    const m=Shell.ghost('<div class="stage"><div class="eq">'+buildRows().join("")
+      + '</div><div>'+extra+'</div></div>');
+    if(m.length && m[0].w) raw=Math.min(raw, room.w/(m[0].w*1.04));
+  };
+  if(idxOf("expand")>=0){ pose(-1); S.tag=S.p.terms.map(function(){ return null; });
+    S.groups=[]; S.cur=-1; shot("expand",""); }
+  for(let g=0; g<n; g++){ pose(g); shot("work",""); }
+  pose(-1); shot("check",checkHTML());
+  S.si=save.si; S.phase=save.phase; S.tag=save.tag; S.groups=save.groups;
+  S.cur=save.cur; S.ansIn=save.ans; S.expIn=save.exp; S.gone=save.gone; S.zap=save.zap;
+  /* below this the writing stops being worth reading, and the page can scroll
+     sideways instead */
+  Shell.scale=Math.max(raw,0.58);
+  const work=document.querySelector(".work");
+  work.style.overflowX = (raw < Shell.scale-0.001) ? "auto" : "visible";
+}
+
+/* ============ starting ============ */
+function begin(fl){
+  S.fl=fl||S.fl;
+  S.p=genProblem(S.fl);
+  S.tag=S.p.terms.map(function(){ return null; });
+  S.groups=[]; S.cur=-1; S.ansIn=""; S.gone={}; S.zap=-1;
+  S.expIn=S.p.exp.map(function(){ return ""; });
+  S.miss=""; S.note=""; S.hint=false; S.clean=true; S.shakeI=-1;
+  S.si=0; S.phase=S.p.steps[0];
+  fitScale();
+  setPhase(S.p.steps[0]);
+}
+function nextProblem(){ Shell.next(); }
+
+document.addEventListener("keydown",function(e){
+  if(Shell.activeEng!==KEY) return;
+  if(e.key==="Enter" && S.phase==="check") nextProblem();
+});
+
+return {start:begin};
+
+})();
+
+Shell.next();
+</script>
+</body>
+</html>
