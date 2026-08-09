@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -180,6 +181,124 @@
         font-size:calc(1.05rem*var(--ps,1));font-weight:500;cursor:pointer;font-family:inherit;white-space:nowrap;}
   .next:hover{background:#1e293b;}
 
+  /* ---- the parts that make a student want one more ----
+     A drill is practised because the next problem is wanted, not because it is
+     assigned. Everything below exists to make the next problem wanted: a bar
+     that is nearly full, a streak that is nearly a record, a row of dots with
+     one dot missing. None of it changes the mathematics; all of it changes how
+     long a student stays. */
+  .progress{display:flex;align-items:center;gap:10px;margin:6px 0 0;}
+  .pbar{flex:1 1 auto;height:8px;border-radius:999px;background:var(--edge);overflow:hidden;min-width:70px;}
+  .pbar i{display:block;height:100%;width:0;border-radius:999px;
+          background:linear-gradient(90deg,var(--blue-b),var(--c1));transition:width .5s ease;}
+  .pmeta{display:flex;align-items:center;gap:8px;font-size:.78rem;color:var(--muted);
+         font-variant-numeric:tabular-nums;white-space:nowrap;}
+  .pmeta b{color:var(--ink);}
+  .rank{font-size:.7rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;
+        color:var(--c1);background:var(--b1);border:1px solid var(--e1);border-radius:999px;padding:2px 9px;}
+  /* the streak is the loudest thing on the page once it is long, because a long
+     streak is the thing a student is trying not to break */
+  .flame{font-size:.82rem;font-weight:700;border-radius:999px;padding:2px 11px;white-space:nowrap;
+         color:var(--muted);background:var(--edge);border:1px solid transparent;transition:all .2s ease;}
+  .flame.on{color:var(--blue);background:var(--blue-bg);border-color:#bfdbfe;}
+  .flame.hot{color:#b45309;background:#fffbeb;border-color:#fde68a;}
+  .flame.blaze{color:#fff;background:linear-gradient(90deg,#f97316,#e11d48);border-color:transparent;
+               animation:pulse 1.6s ease-in-out infinite;}
+  @keyframes pulse{0%,100%{transform:none;}50%{transform:scale(1.05);}}
+  .pb{font-size:.78rem;color:var(--faint);font-variant-numeric:tabular-nums;white-space:nowrap;}
+
+  /* one row per kind of problem, five dots each. An unfinished row is an itch */
+  .mastery{display:flex;flex-wrap:wrap;gap:5px 16px;margin-top:7px;font-size:.75rem;color:var(--faint);}
+  .mrow{display:inline-flex;align-items:center;gap:5px;white-space:nowrap;}
+  .pip{width:7px;height:7px;border-radius:50%;background:var(--edge);display:inline-block;}
+  .pip.on{background:var(--green);}
+  .mrow.mastered{color:var(--green);font-weight:600;}
+  .mrow.mastered .pip.on{background:var(--green);box-shadow:0 0 0 2px var(--green-bg);}
+
+  .toast{position:fixed;left:50%;top:14px;transform:translateX(-50%) translateY(-20px);
+         background:var(--ink);color:#fff;border-radius:999px;padding:10px 22px;font-size:.95rem;
+         font-weight:600;box-shadow:0 10px 28px rgba(15,23,42,.3);
+         opacity:0;pointer-events:none;transition:opacity .25s ease,transform .25s ease;z-index:40;white-space:nowrap;}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  .badges{display:flex;flex-wrap:wrap;gap:6px;width:100%;margin-top:5px;}
+  .badge{font-size:.8rem;font-weight:600;border-radius:999px;padding:2px 11px;white-space:nowrap;
+         border:1px solid var(--edge);background:#fff;color:var(--muted);animation:grow .3s ease-out;}
+  .badge.good{border-color:var(--e2);background:var(--b2);color:var(--c2);}
+  .badge.time{border-color:#bfdbfe;background:var(--blue-bg);color:var(--blue);}
+  .badge.xp{border-color:var(--e1);background:var(--b1);color:var(--c1);}
+  /* the answer sliding into standard form is worth seeing happen */
+  .line.answer .tm.slide{animation:grow .4s ease-out;}
+
+  /* ---- Run mode ----
+     A drill without stakes is homework. The clock is the whole design: it is
+     always visible, always falling, and the only way to keep it up is to solve
+     faster than it drains. That turns every problem from a task into a decision
+     about how hard to push, which is the thing that makes people say one more. */
+  .tab-btn.runtab{color:#fff;background:linear-gradient(90deg,#f97316,#e11d48);
+                  border-radius:6px;margin-right:12px;position:relative;}
+  .tab-btn.runtab::after{content:"";position:absolute;right:-7px;top:18%;height:64%;
+                         border-right:1px solid var(--edge);}
+  .tab-btn.runtab:hover{color:#fff;filter:brightness(1.07);}
+  .tab-btn.runtab.active{color:#fff;border-bottom:3px solid #e11d48;}
+
+  .runhud{display:flex;align-items:center;gap:14px;flex-wrap:wrap;width:100%;}
+  .clock{position:relative;display:flex;flex-direction:column;gap:4px;min-width:9rem;flex:0 0 auto;}
+  .clkrow{display:flex;align-items:baseline;gap:8px;}
+  .clktxt{font-family:Georgia,serif;font-size:2rem;font-weight:600;line-height:1;
+          font-variant-numeric:tabular-nums;color:var(--ink);transition:color .2s;}
+  .clklbl{font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);}
+  .clkbar{height:7px;border-radius:999px;background:var(--edge);overflow:hidden;}
+  .clkbar i{display:block;height:100%;border-radius:999px;background:var(--green);
+            transition:width .12s linear,background .3s;}
+  .clock.low .clktxt{color:#b45309;}
+  .clock.low .clkbar i{background:#f59e0b;}
+  .clock.crit .clktxt{color:var(--rose);animation:pulse .6s ease-in-out infinite;}
+  .clock.crit .clkbar i{background:var(--rose);}
+  /* the time a solve buys back, said where the time lives */
+  .tpop{position:absolute;right:-6px;top:-4px;font-size:1.05rem;font-weight:700;
+        color:var(--green);pointer-events:none;animation:tfly .9s ease-out forwards;}
+  .tpop.bad{color:var(--rose);}
+  @keyframes tfly{0%{opacity:0;transform:translateY(6px);}
+                  25%{opacity:1;transform:translateY(-2px);}
+                  100%{opacity:0;transform:translateY(-22px);}}
+
+  .rstat{display:flex;flex-direction:column;gap:1px;}
+  .rstat b{font-size:1.35rem;line-height:1.1;font-variant-numeric:tabular-nums;}
+  .rstat span{font-size:.66rem;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);}
+  .rstat.combo b{color:var(--c1);}
+  .rstat.combo.hi b{background:linear-gradient(90deg,#f97316,#e11d48);
+                    -webkit-background-clip:text;background-clip:text;color:transparent;}
+  .bump{animation:bump .32s ease-out;}
+  @keyframes bump{0%{transform:none;}40%{transform:scale(1.28);}100%{transform:none;}}
+  .tier{margin-left:auto;font-size:.72rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;
+        color:var(--muted);background:var(--edge);border-radius:999px;padding:3px 11px;white-space:nowrap;}
+
+  /* the results card. Big number, three facts, and a button under the thumb */
+  .over{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0 2px;
+        font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;}
+  .ovs{font-family:Georgia,serif;font-size:4.2rem;line-height:1;font-weight:600;
+       font-variant-numeric:tabular-nums;color:var(--ink);animation:grow .4s ease-out;}
+  .ovl{font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;color:var(--faint);margin-bottom:14px;}
+  .ovrow{display:flex;flex-wrap:wrap;justify-content:center;gap:10px 26px;}
+  .ovcell{display:flex;flex-direction:column;align-items:center;gap:1px;}
+  .ovcell b{font-size:1.5rem;font-variant-numeric:tabular-nums;}
+  .ovcell span{font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);}
+  .ovbest{margin-top:14px;font-size:.95rem;font-weight:600;color:var(--green);
+          background:var(--green-bg);border:1px solid #a7f3d0;border-radius:999px;padding:5px 16px;}
+  .ovbest.miss{color:var(--muted);background:var(--edge);border-color:transparent;font-weight:500;}
+  .ovkinds{margin-top:12px;font-size:.8rem;color:var(--faint);text-align:center;max-width:34rem;}
+  .go{background:linear-gradient(90deg,#f97316,#e11d48);color:#fff;border:none;border-radius:9px;
+      padding:11px 26px;font-size:1.1rem;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;}
+  .go:hover{filter:brightness(1.07);}
+  .kbd{font-size:.78rem;color:var(--faint);margin-left:10px;white-space:nowrap;}
+
+  @media (max-width:860px){
+    .clktxt{font-size:1.7rem;} .clock{min-width:7.5rem;}
+    .rstat b{font-size:1.15rem;} .runhud{gap:10px;}
+    .ovs{font-size:3.2rem;}
+  }
+
   @media (max-width:1150px){ .main{padding-top:6px;} }
   /* a narrow screen still gets the larger writing — it just gets more of the
      scrolling that pays for it */
@@ -209,6 +328,12 @@
       <div class="levels" id="levels"></div>
     </div>
 
+    <div class="progress">
+      <div class="pbar"><i id="pfill"></i></div>
+      <div class="pmeta" id="pmeta"></div>
+    </div>
+    <div class="mastery" id="mastery"></div>
+
     <div class="main">
       <div class="promptbar" id="promptbar"></div>
 
@@ -227,13 +352,39 @@
 <!-- offscreen: a finished copy of the problem is drawn here and measured, so the
      real one can be sized once and then left alone -->
 <div class="ghost" id="ghost" aria-hidden="true"></div>
+<div class="toast" id="toast" aria-live="polite"></div>
 <script>
 
 /* ============ shell: one score, tabs state, router ============ */
 const Shell = {
   done:0, streak:0, active:null, activeEng:null,
-  mode:"simple", engines:{}, timers:[], recent:[],
+  mode:"mixed", engines:{}, timers:[], recent:[],
   counts:{},
+
+  /* --- progression. Kept for the session only, so a fresh page is a fresh
+     start; nothing is written to the browser. --- */
+  xp:0, level:1, gained:0, bestStreak:0, bestTime:0, mastery:{},
+  toastQ:[], toastBusy:false, hudMode:null, runTimer:null,
+  RANKS:["Beginner","Sorter","Gatherer","Collector","Tidier","Simplifier",
+         "Adept","Sharp","Fluent","Slick","Master","Grandmaster"],
+  MASTER:5,
+
+  /* --- the run --- */
+  run:{on:false, over:false, t:0, score:0, combo:0, bestCombo:0, solved:0,
+       elapsed:0, pause:false, tier:0, kinds:{}},
+  runBest:{score:0, solved:0, combo:0},
+  START:55,
+  /* difficulty is not a setting, it is something that happens to you. The pool
+     only ever grows, so a run has a shape: easy, then busy, then frightening,
+     then over. Nobody chooses the hard tab; everybody reaches it. */
+  TIERS:[
+    {n:0,  pool:["simple","twovars"],          say:"Warm-up",                     sh:"Warm-up"},
+    {n:3,  pool:["powers","cancel"],           say:"Powers &amp; cancelling",     sh:"Powers"},
+    {n:6,  pool:["products","fractions"],      say:"xy terms &amp; fractions",    sh:"Fractions"},
+    {n:9,  pool:["brackets"],                  say:"Brackets",                    sh:"Brackets"},
+    {n:13, pool:["double","everything"],       say:"Two brackets &amp; everything", sh:"Everything"},
+    {n:17, pool:["distribute"],                say:"Distribute",                  sh:"Distribute"}
+  ],
 
   title:"Combining like terms",
   kinds:[
@@ -243,14 +394,15 @@ const Shell = {
     {id:"products",  tab:"xy Terms",     tally:"xy &hellip; x",   name:"Two letters multiplied together"},
     {id:"brackets",  tab:"Brackets",     tally:"k(x + a)",        name:"A bracket to multiply out"},
     {id:"double",    tab:"Two Brackets", tally:"k(&middot;) &plusmn; m(&middot;)", name:"Two brackets to multiply out"},
+    {id:"distribute",tab:"Distribute",   tally:"2x(x &minus; 3)", name:"A term with a letter outside the bracket"},
     {id:"fractions", tab:"Fractions",    tally:"&frac12;x &hellip; &frac13;x", name:"Fractions in front"},
-    {id:"cancel",    tab:"Cancelling",   tally:"5x &minus; 5x",   name:"A group that comes to nothing"},
+    {id:"cancel",    tab:"Cancelling",   tally:"5x &minus; 5x",   name:"A pair that comes to nothing"},
     {id:"everything",tab:"Everything",   tally:"all at once",     name:"Several of these at once"}
   ],
   /* the harder kinds are given the shorter wording from the first problem: a
      student who has chosen them is not the student who needs every step spelt
      out. The full working is always one press of Hint away. */
-  hard:{products:1, double:1, fractions:1, cancel:1, everything:1},
+  hard:{products:1, double:1, distribute:1, fractions:1, cancel:1, everything:1},
 
   kind:function(id){
     const ks=Shell.kinds;
@@ -317,13 +469,54 @@ const Shell = {
   /* the scaffolding thins out once the student is clearly not needing it */
   LEAN:3,
   lean:function(){
-    return !!Shell.hard[Shell.active] || Shell.streak>=Shell.LEAN;
+    return Shell.run.on || !!Shell.hard[Shell.active] || Shell.streak>=Shell.LEAN;
+  },
+
+  /* ---- rank and experience ----
+     The bar is short on purpose. A level that takes three or four problems keeps
+     the next reward inside the horizon of "one more", which is the only distance
+     that ever gets anyone to do a fifth problem. */
+  need:function(){ return 40 + Shell.level*25; },
+  rank:function(){ return Shell.RANKS[Math.min(Shell.level-1, Shell.RANKS.length-1)]; },
+  addXP:function(g){
+    Shell.gained=g; Shell.xp+=g;
+    while(Shell.xp >= Shell.need()){
+      Shell.xp -= Shell.need(); Shell.level++;
+      Shell.toast("Level "+Shell.level+" &middot; "+Shell.rank());
+    }
+  },
+  toast:function(msg){
+    Shell.toastQ.push(msg);
+    /* a backlog of congratulations is worse than none: the newest two win */
+    if(Shell.toastQ.length>2) Shell.toastQ=Shell.toastQ.slice(-2);
+    Shell.pumpToast();
+  },
+  pumpToast:function(){
+    if(Shell.toastBusy || !Shell.toastQ.length) return;
+    const el=document.getElementById("toast");
+    if(!el){ Shell.toastQ=[]; return; }
+    Shell.toastBusy=true;
+    el.innerHTML=Shell.toastQ.shift();
+    el.className="toast show";
+    /* deliberately outside Shell.timers: a toast is about the run, not about the
+       problem, and must survive the page moving on to the next one */
+    setTimeout(function(){
+      el.className="toast";
+      setTimeout(function(){ Shell.toastBusy=false; Shell.pumpToast(); },300);
+    },1500);
   },
 
   head:function(id){
-    const c=Shell.counts;
+    const c=Shell.counts, st=Shell.streak;
     document.getElementById("title").innerHTML = Shell.title;
-    /* eight kinds is too many to list every time, so the breakdown is kept for
+    /* during a run the HUD says everything worth saying, and a second row of
+       numbers next to a falling clock is just noise */
+    if(Shell.run.on){
+      document.getElementById("levels").innerHTML="";
+      Shell.paintProgress(); Shell.paintMastery();
+      return;
+    }
+    /* ten kinds is too many to list every time, so the breakdown is kept for
        mixed practice, where knowing which kind you are short of is the point */
     let tally="";
     if(Shell.mode==="mixed"){
@@ -333,24 +526,285 @@ const Shell = {
           }).join("")
         + '</span>';
     }
+    const cls = st>=10 ? "flame blaze" : st>=5 ? "flame hot" : st>0 ? "flame on" : "flame";
+    const fire = st>=10 ? " &#128293;&#128293;" : st>=5 ? " &#128293;" : "";
     document.getElementById("levels").innerHTML =
-      '<span class="score">'+Shell.done+' done &middot; <b>'+Shell.streak+'</b> in a row</span>'
+      '<span class="score">'+Shell.done+' done</span>'
+      + '<span class="'+cls+'">'+(st ? st+' in a row'+fire : 'streak: 0')+'</span>'
+      + (Shell.bestStreak>1 ? '<span class="pb">best '+Shell.bestStreak
+         + (Shell.bestTime ? ' &middot; fastest '+Shell.bestTime+'s' : '')+'</span>' : "")
       + (Shell.lean() ? '<span class="lean" title="Shorter wording &mdash; the full working is still under Hint">'
                       + (Shell.hard[Shell.active]?'lean':'lean &middot; on a run')+'</span>' : "")
       + tally;
+    Shell.paintProgress();
+    Shell.paintMastery();
   },
-  solved:function(clean){
-    Shell.done++;
-    Shell.streak = clean ? Shell.streak+1 : 0;
-    if(Shell.active) Shell.counts[Shell.active]=(Shell.counts[Shell.active]||0)+1;
+  /* the HUD is only rebuilt when it changes shape. Rewriting it ten times a
+     second would kill the bar's transition and blow away the floating +time */
+  paintProgress:function(){
+    const box=document.querySelector(".progress");
+    if(!box) return;
+    const want = Shell.run.on ? "run" : "xp";
+    if(Shell.hudMode!==want){
+      Shell.hudMode=want;
+      box.innerHTML = want==="run"
+        ? '<div class="runhud">'
+          + '<div class="clock" id="clock"><div class="clkrow"><span class="clktxt" id="clkTxt">0:45</span>'
+          + '<span class="clklbl">left</span></div><div class="clkbar"><i id="clkBar"></i></div></div>'
+          + '<div class="rstat"><b id="scoreVal">0</b><span>score</span></div>'
+          + '<div class="rstat combo" id="comboBox"><b id="comboVal">&times;1</b><span>combo</span></div>'
+          + '<div class="rstat"><b id="solvedVal">0</b><span>solved</span></div>'
+          + '<span class="tier" id="tierTag">Warm-up</span></div>'
+        : '<div class="pbar"><i id="pfill"></i></div><div class="pmeta" id="pmeta"></div>';
+    }
+    if(want==="run"){ Shell.paintClock(); Shell.paintRunStats(); return; }
+    const fill=document.getElementById("pfill");
+    if(fill) fill.style.width = Math.round(100*Shell.xp/Shell.need())+"%";
+    const meta=document.getElementById("pmeta");
+    if(meta) meta.innerHTML='<span class="rank">'+Shell.rank()+'</span>'
+      + '<span><b>'+Shell.xp+'</b> / '+Shell.need()+' xp</span>';
+  },
+  paintClock:function(){
+    const r=Shell.run, el=document.getElementById("clkTxt");
+    if(!el) return;
+    const s=Math.max(0,Math.ceil(r.t));
+    el.textContent = Math.floor(s/60)+":"+(s%60<10?"0":"")+(s%60);
+    const bar=document.getElementById("clkBar");
+    if(bar) bar.style.width = Math.max(0,Math.min(100,100*r.t/Shell.START))+"%";
+    const w=document.getElementById("clock");
+    if(w) w.className = "clock"+(r.t<=10?" low":"")+(r.t<=5?" crit":"");
+  },
+  paintRunStats:function(){
+    const r=Shell.run;
+    const sv=document.getElementById("scoreVal");
+    if(sv) sv.textContent=r.score.toLocaleString();
+    const cv=document.getElementById("comboVal");
+    if(cv) cv.innerHTML="&times;"+Shell.mult();
+    const cb=document.getElementById("comboBox");
+    if(cb) cb.className="rstat combo"+(Shell.mult()>=4?" hi":"");
+    const sd=document.getElementById("solvedVal");
+    if(sd) sd.textContent=r.solved;
+    const tt=document.getElementById("tierTag");
+    if(tt) tt.innerHTML=Shell.TIERS[Shell.tierAt(r.solved)].say;
+  },
+  bump:function(id){
+    const el=document.getElementById(id);
+    if(!el) return;
+    el.classList.remove("bump");
+    void el.offsetWidth;
+    el.classList.add("bump");
   },
 
-  /* don't let one kind of problem come up three times running in mixed mode */
+  /* the multiplier is capped so that a long run is won by surviving rather than
+     by one untouchable streak, and so a slip costs a lot without costing all */
+  mult:function(){ return Math.min(6, 1+Math.floor(Shell.run.combo/2)); },
+  tierAt:function(n){
+    let i=0;
+    Shell.TIERS.forEach(function(t,j){ if(n>=t.n) i=j; });
+    return i;
+  },
+  runPool:function(){
+    let p=[];
+    Shell.TIERS.forEach(function(t){ if(Shell.run.solved>=t.n) p=p.concat(t.pool); });
+    return p;
+  },
+  startRun:function(){
+    clearInterval(Shell.runTimer);
+    Shell.clearTimers();
+    Shell.run={on:true, over:false, t:Shell.START, score:0, combo:0, bestCombo:0,
+               solved:0, elapsed:0, pause:false, tier:0, kinds:{}};
+    Shell.mode="run"; Shell.recent=[]; Shell.hudMode=null;
+    Shell.paintTabs();
+    Shell.runTimer=setInterval(Shell.tick,100);
+    Shell.next();
+  },
+  stopRun:function(){
+    clearInterval(Shell.runTimer); Shell.runTimer=null;
+    Shell.run.on=false; Shell.run.over=false; Shell.hudMode=null;
+  },
+  tick:function(){
+    const r=Shell.run;
+    if(!r.on || r.over || r.pause) return;
+    r.t-=0.1; r.elapsed+=0.1;
+    if(r.t<=0){ r.t=0; Shell.paintClock(); Shell.endRun(); return; }
+    Shell.paintClock();
+  },
+  addTime:function(sec){
+    const r=Shell.run;
+    if(!r.on || r.over) return;
+    /* time cannot be hoarded. A player who banked ninety seconds would have
+       bought their way out of the only thing making this interesting, so a
+       solve can fill the clock and never overfill it */
+    r.t = sec>0 ? Math.min(Shell.START, r.t+sec) : Math.max(0, r.t+sec);
+    Shell.paintClock();
+    const c=document.getElementById("clock");
+    if(!c) return;
+    const s=document.createElement("span");
+    s.className="tpop"+(sec<0?" bad":"");
+    s.textContent=(sec>0?"+":"")+Math.round(sec)+"s";
+    c.appendChild(s);
+    setTimeout(function(){ if(s.parentNode) s.parentNode.removeChild(s); },900);
+  },
+
+  /* what a solve is worth in a run. Time is bought back in proportion to how
+     much work the problem was, so a four-pile bracket problem is not a losing
+     trade — but nothing buys back more time than it took a fast solver, which
+     is why the clock always wins in the end */
+  runSolve:function(q,clean,secs){
+    const r=Shell.run;
+    if(!r.on || r.over) return {pts:0, time:0};
+    const before=Shell.tierAt(r.solved);
+    r.solved++;
+    if(Shell.active) r.kinds[Shell.active]=(r.kinds[Shell.active]||0)+1;
+    if(clean){ r.combo++; if(r.combo>r.bestCombo) r.bestCombo=r.combo; }
+    else r.combo=0;
+
+    const work = q.fams.length + (q.exp.length?1.5:0) + q.terms.length*0.25;
+    /* The time a solve buys back shrinks as the run goes on. Without this the
+       run has no ending: a strong player banks time faster than the clock takes
+       it and simply never dies, and a game you cannot lose is a treadmill. With
+       it, every run has the same shape — comfortable, then tight, then over —
+       and the only question is how far down that slope skill carries you. The
+       shrinking is visible in the +Ns that floats off the clock, so it is felt
+       before it is understood. */
+    const decay = Math.max(0.45, 1 - r.solved*0.016);
+    const time = Math.max(2, Math.round(Math.min(13, 4+work*1.6)*decay*(clean?1:0.7)));
+    /* score, unlike time, grows with depth: surviving late is the achievement */
+    let pts = Math.round((40+work*22)*Shell.mult()*(1+r.solved*0.02)/10)*10;
+    if(clean && secs<=Math.round(work*2.2)) pts+=Math.round(pts*0.25/10)*10;  /* quick */
+    r.score+=pts;
+
+    Shell.addTime(time);
+    Shell.paintRunStats(); Shell.bump("scoreVal");
+    if(clean && r.combo>1) Shell.bump("comboVal");
+    const after=Shell.tierAt(r.solved);
+    if(after>before) Shell.toast(Shell.TIERS[after].say+" &mdash; unlocked");
+    return {pts:pts, time:time};
+  },
+  runMiss:function(){
+    const r=Shell.run;
+    if(!r.on || r.over) return;
+    r.combo=0; Shell.paintRunStats();
+    Shell.addTime(-3);
+  },
+  runSkip:function(){
+    const r=Shell.run;
+    if(!r.on || r.over) return;
+    r.combo=0; Shell.paintRunStats();
+    Shell.addTime(-8);
+  },
+
+  endRun:function(){
+    Shell.clearTimers();
+    clearInterval(Shell.runTimer); Shell.runTimer=null;
+    const r=Shell.run;
+    r.over=true; r.pause=true;
+    Shell.activeEng=null;
+    const prev=Shell.runBest, isBest = r.score>prev.score;
+    if(isBest) Shell.runBest={score:r.score, solved:r.solved, combo:r.bestCombo};
+
+    Shell.scale=1; Shell.applyScale();
+    const el=document.getElementById("eq");
+    const pn=document.getElementById("panel");
+    if(pn) pn.innerHTML="";
+    const mins=Math.floor(r.elapsed/60), secs=Math.round(r.elapsed%60);
+    const kinds=Shell.kinds.filter(function(k){ return r.kinds[k.id]; })
+      .map(function(k){ return k.tab+" &times;"+r.kinds[k.id]; }).join(" &nbsp;&middot;&nbsp; ");
+    if(el) el.innerHTML =
+      '<div class="over"><div class="ovs">'+r.score.toLocaleString()+'</div>'
+      + '<div class="ovl">points</div>'
+      + '<div class="ovrow">'
+      +   '<div class="ovcell"><b>'+r.solved+'</b><span>solved</span></div>'
+      +   '<div class="ovcell"><b>&times;'+Math.min(6,1+Math.floor(r.bestCombo/2))+'</b><span>best combo</span></div>'
+      +   '<div class="ovcell"><b>'+mins+':'+(secs<10?"0":"")+secs+'</b><span>survived</span></div>'
+      +   '<div class="ovcell"><b>'+Shell.TIERS[Shell.tierAt(r.solved)].sh+'</b><span>reached</span></div>'
+      + '</div>'
+      + '<div class="ovbest'+(isBest?"":" miss")+'">'
+      +   (isBest ? (prev.score ? "New best &mdash; beat "+prev.score.toLocaleString() : "First run on the board")
+                  : (prev.score-r.score)+" short of your best ("+prev.score.toLocaleString()+")")
+      + '</div>'
+      + (kinds?'<div class="ovkinds">'+kinds+'</div>':'')
+      + '</div>';
+
+    const pb=document.getElementById("promptbar");
+    if(pb){
+      pb.innerHTML='<div class="prompt"><div class="tagline"><span class="tag">Time</span></div>'
+        + '<span>'+(isBest?'Best run yet.':'The clock ran out.')
+        + ' Every solve buys time back &mdash; the faster you clear a line, the longer you last.</span>'
+        + '<button class="go" id="goBtn">Go again</button>'
+        + '<span class="kbd">or press Enter</span></div>'
+        + '<div class="skipwrap"><button class="link" id="practiceBtn">Back to practice</button></div>';
+      const g=document.getElementById("goBtn");
+      if(g) g.onclick=Shell.startRun;
+      const pr=document.getElementById("practiceBtn");
+      if(pr) pr.onclick=function(){ Shell.stopRun(); Shell.setTab("mixed",true); };
+    }
+    Shell.paintProgress();
+  },
+  /* five clean solves masters a kind. A mistake takes one dot back, so mastery
+     has to be held rather than merely reached */
+  paintMastery:function(){
+    const el=document.getElementById("mastery");
+    if(!el) return;
+    if(Shell.mode!=="mixed" || Shell.run.on){ el.innerHTML=""; return; }
+    el.innerHTML = Shell.kinds.map(function(k){
+      const m=Shell.mastery[k.id]||0;
+      let pips="";
+      for(let i=0;i<Shell.MASTER;i++) pips+='<span class="pip'+(i<m?" on":"")+'"></span>';
+      return '<span class="mrow'+(m>=Shell.MASTER?" mastered":"")+'" title="'+k.name+'">'
+           + k.tab+' '+pips+'</span>';
+    }).join("");
+  },
+
+  solved:function(clean, perfect, secs){
+    Shell.done++;
+    Shell.streak = clean ? Shell.streak+1 : 0;
+    const id=Shell.active;
+    if(id) Shell.counts[id]=(Shell.counts[id]||0)+1;
+
+    if(id){
+      const was=Shell.mastery[id]||0;
+      const now=clean ? Math.min(Shell.MASTER, was+1) : Math.max(0, was-1);
+      Shell.mastery[id]=now;
+      if(now===Shell.MASTER && was<Shell.MASTER)
+        Shell.toast("Mastered: "+Shell.kind(id).name);
+    }
+
+    /* a milestone only, and only once. Congratulating every single correct
+       answer is how a reward stops being one */
+    const st=Shell.streak, newBest = st>0 && st>Shell.bestStreak;
+    if(newBest) Shell.bestStreak=st;
+    if(!Shell.run.on && (st===3 || st===5 || st===10 || (st>10 && st%5===0)))
+      Shell.toast((newBest && st>3 ? "New best &middot; " : "")+st+" in a row &#128293;");
+
+    let fast=false;
+    if(clean && secs && (!Shell.bestTime || secs<Shell.bestTime)){
+      if(Shell.bestTime) fast=true;
+      Shell.bestTime=secs;
+      if(fast) Shell.toast("Fastest yet: "+secs+"s");
+    }
+
+    /* what a solve is worth: the bulk of it for finishing, a real slice for
+       finishing without a slip, and a bonus that grows with the run — so a
+       streak is worth protecting rather than just worth counting */
+    let g = 10;
+    if(clean)   g += 6;
+    if(perfect) g += 4;
+    g += Math.min(12, Shell.streak*2);
+    if(fast)    g += 6;
+    Shell.addXP(g);
+    return {gain:g, fast:fast};
+  },
+
+  /* don't let one kind of problem come up three times running */
   pickKind:function(){
-    if(Shell.mode !== "mixed") return Shell.mode;
-    let pool=Shell.kinds.map(function(k){return k.id;});
+    let pool;
+    if(Shell.run.on) pool=Shell.runPool();
+    else if(Shell.mode !== "mixed") return Shell.mode;
+    else pool=Shell.kinds.map(function(k){return k.id;});
     if(Shell.recent.length>1 && Shell.recent[0]===Shell.recent[1]){
-      pool=pool.filter(function(k){return k!==Shell.recent[0];});
+      const thin=pool.filter(function(k){return k!==Shell.recent[0];});
+      if(thin.length) pool=thin;
     }
     const k=pool[Math.floor(Math.random()*pool.length)];
     Shell.recent.unshift(k); Shell.recent=Shell.recent.slice(0,2);
@@ -366,23 +820,36 @@ const Shell = {
   },
 
   paintTabs:function(){
+    /* Run leads, then Mixed. Practising one kind at a time teaches the move;
+       mixed practice teaches choosing the move; the run teaches doing it under
+       the only condition anyone is ever actually assessed under */
     document.getElementById("navTabs").innerHTML =
-      Shell.kinds.map(function(k){
+      '<button class="tab-btn runtab'+(Shell.mode==="run"?" active":"")+'" data-mode="run">&#9889; Run</button>'
+      + '<button class="tab-btn'+(Shell.mode==="mixed"?" active":"")+'" data-mode="mixed">Mixed</button>'
+      + Shell.kinds.map(function(k){
         return '<button class="tab-btn'+(Shell.mode===k.id?" active":"")
              + '" data-mode="'+k.id+'">'+k.tab+'</button>';
-      }).join("")
-      + '<button class="tab-btn'+(Shell.mode==="mixed"?" active":"")+'" data-mode="mixed">Mixed</button>';
+      }).join("");
     document.querySelectorAll("#navTabs .tab-btn").forEach(function(btn){
       btn.onclick = function(){ Shell.setTab(btn.getAttribute("data-mode")); };
     });
   },
-  setTab:function(mode){
-    if(Shell.mode === mode) return;
+  setTab:function(mode,force){
+    if(mode==="run"){ Shell.startRun(); return; }
+    if(Shell.mode === mode && !force) return;
+    if(Shell.run.on) Shell.stopRun();
     Shell.mode = mode; Shell.recent=[];
     Shell.paintTabs();
     Shell.next();
   }
 };
+
+/* one key restarts a run, which is the whole difference between "that was fun"
+   and another five minutes of algebra */
+document.addEventListener("keydown",function(e){
+  if(!Shell.run.on || !Shell.run.over) return;
+  if(e.key==="Enter" || e.key===" "){ e.preventDefault(); Shell.startRun(); }
+});
 
 Shell.paintTabs();
 Shell.watchFit();
@@ -468,6 +935,28 @@ function letters(vs){ return vs.map(function(x){ return x.v; }).join(""); }
 function famKey(t){ return vsKey(t.vs); }
 function famName(t){
   return t.vs.length ? "the "+vsHTML(t.vs)+" terms" : "the loose numbers";
+}
+
+/* ============ standard form ============
+   Addition does not care what order the groups were gathered in, so the drill
+   lets the student gather them in any order at all. Writing does care: an answer
+   is written with the highest power first, then the plain letters, then the
+   loose number. So the answer is built in the student's order and then tidied
+   into that shape at the end, where the reordering can be seen happening and
+   read as the separate convention it is. */
+function degOf(t){ return t.vs.reduce(function(s,x){ return s+x.p; },0); }
+function stdSort(list){
+  return list.slice().sort(function(a,b){
+    const da=degOf(a), db=degOf(b);
+    if(da!==db) return db-da;                 /* higher power first */
+    const la=vsTxt(a.vs), lb=vsTxt(b.vs);
+    return la<lb ? -1 : la>lb ? 1 : 0;        /* then alphabetical: x before y */
+  });
+}
+function isStd(list){
+  const s=stdSort(list);
+  for(let i=0;i<list.length;i++) if(list[i]!==s[i]) return false;
+  return true;
 }
 
 /* what a term looks like written down. The first term on a line shows a sign
@@ -750,13 +1239,14 @@ function genFractions(){
 /* --- a group that comes to nothing ---
    The pile is gathered like any other and the box takes a 0. What that 0 means
    is the lesson: no x at all, so nothing of it is left in the answer. */
+/* Exactly two terms, and they are exact opposites: −4x and 4x, nothing else.
+   Three terms that happen to total zero (−2x, −2x, 4x) is arithmetic dressed up
+   as cancelling — the student has to add them to find out, and the page telling
+   them they cancel gives away the very step being practised. A true pair is
+   something a student can see. */
 function zeroPile(vs){
-  if(Math.random()<0.55){
-    const a=rint(2,9);
-    return [Ti(a,vs), Ti(-a,vs)];
-  }
-  const a=rint(1,5), b=rint(1,4);
-  return [Ti(a,vs), Ti(b,vs), Ti(-(a+b),vs)];
+  const a=rint(2,9);
+  return [Ti(a,vs), Ti(-a,vs)];
 }
 function genCancel(){
   const ltr=pick(VARS);
@@ -786,12 +1276,23 @@ function genCancel(){
    The number outside multiplies both terms inside, and when the bracket is
    being taken away the minus reaches both of them. That is the whole of the
    difficulty, so the generator makes sure it comes up. */
+/* A bracket is a multiplier and two terms inside it:
+     s  · k·(mv) · ( as·a·V  +  bs·b )
+   mv is what else the multiplier carries besides the number — empty for a plain
+   3(x + 4), a letter for 2x(x − 3). When the multiplier carries the same letter
+   that is inside, multiplying through raises the power, which is why this one
+   generalisation is the whole of the distribute kind. */
 function bracket(ltr){
   const k=rint(2,5), a=Math.random()<0.4?1:rint(2,4), b=rint(1,9);
-  return {k:k, a:a, b:b, s:1, bs:sgn(0.55), V:ltr};
+  return {k:k, a:a, as:1, b:b, s:1, bs:sgn(0.55), V:ltr, mv:[]};
 }
+function brMult(br){ return T(R(br.k), (br.mv||[]).slice()); }
+function brInner(br){ return Ti((br.as===undefined?1:br.as)*br.a, [V(br.V,1)]); }
+function brNum(br){ return Ti(br.bs*br.b, []); }
 function brTerms(br){
-  return [ Ti(br.s*br.k*br.a,[V(br.V,1)]), Ti(br.s*br.bs*br.k*br.b,[]) ];
+  const mv=(br.mv||[]), as=(br.as===undefined?1:br.as);
+  return [ T(R(br.s*br.k*as*br.a), [V(br.V,1)].concat(mv)),
+           T(R(br.s*br.bs*br.k*br.b), mv.slice()) ];
 }
 /* a bare equation is handed back as display tokens; the ones that are brackets
    are opened out into the flat list of terms the rest of the drill works on */
@@ -844,6 +1345,45 @@ function genDouble(){
   if(!q) return null;
   /* two brackets that expand to the same numbers make the gathering trivial */
   if(q.terms[0].c.n===q.terms[2].c.n && q.terms[1].c.n===q.terms[3].c.n) return null;
+  return q;
+}
+
+/* --- a term with a letter outside the bracket ---
+   2x(x − 3) − 4x(−8x + 7). Two things happen at once here that never happen in
+   the plain bracket kinds: the multiplier carries a letter, so multiplying
+   through raises the power and squares appear on the line that were nowhere in
+   the question; and the first term inside may itself be negative, so a minus
+   outside meeting a minus inside has to be worked rather than read off. What
+   comes out is two full piles — the squares and the plain letters — and the
+   gathering afterwards is the real drill. */
+function varBracket(ltr){
+  return {k:rint(1,5), a:Math.random()<0.4?1:rint(2,8), as:sgn(0.4),
+          b:rint(1,9), bs:sgn(0.5), s:1, V:ltr, mv:[V(ltr,1)]};
+}
+function genDistribute(){
+  const ltr=pick(VARS);
+  const b1=varBracket(ltr), b2=varBracket(ltr);
+  b1.s=sgn(0.2); b2.s=sgn(0.6);
+  const disp=[{br:b1},{br:b2}];
+  /* now and then a loose term joins the line, so the piles are not always a
+     tidy two and two and the count cannot be guessed from the shape */
+  if(Math.random()<0.3){
+    disp.push(Math.random()<0.5 ? Ti(rint(1,9)*sgn(0.5),[V(ltr,2)])
+                                : Ti(rint(1,9)*sgn(0.5),[V(ltr,1)]));
+  }
+  const vals={}; vals[ltr]=2;
+  const q=bracketProblem(disp,vals);
+  if(!q) return null;
+  /* both brackets landing on the same numbers makes the gathering trivial */
+  if(rEq(q.terms[0].c,q.terms[2].c) && rEq(q.terms[1].c,q.terms[3].c)) return null;
+  /* the check at the end has to stay a number a person would read */
+  let worth=R(0);
+  q.terms.forEach(function(t){
+    let v=R(1);
+    t.vs.forEach(function(x){ v=rMul(v,R(Math.pow(vals[x.v],x.p))); });
+    worth=rAdd(worth,rMul(t.c,v));
+  });
+  if(Math.abs(worth.n)>400) return null;
   return q;
 }
 
@@ -961,8 +1501,8 @@ function genEverything(){
 }
 
 const GEN={simple:genSimple, twovars:genTwoVars, powers:genPowers, products:genProducts,
-           brackets:genBrackets, double:genDouble, fractions:genFractions, cancel:genCancel,
-           everything:genEverything};
+           brackets:genBrackets, double:genDouble, distribute:genDistribute,
+           fractions:genFractions, cancel:genCancel, everything:genEverything};
 
 function genProblem(fl){
   const f=GEN[fl]||genSimple;
@@ -976,7 +1516,10 @@ function finish(q){
   if(!q.exp) q.exp=[];
   q.steps=[];
   if(q.exp.length) q.steps.push("expand");
-  q.steps.push("work","done","check");
+  q.steps.push("work","done");
+  /* the substitution check is the slowest and most valuable thing on the page,
+     which is exactly why it belongs in practice and not in a run */
+  if(!Shell.run.on) q.steps.push("check");
   return q;
 }
 
@@ -988,7 +1531,9 @@ function finish(q){
 const S={
   p:null, fl:"simple", si:0, phase:"work",
   tag:[], groups:[], cur:-1, expIn:[], ansIn:"", gone:{}, zap:-1,
-  miss:"", note:"", hint:false, clean:true, firstId:null, shakeI:-1
+  miss:"", note:"", hint:false, clean:true, firstId:null, shakeI:-1,
+  ordered:false, reordered:false, usedHint:false,
+  t0:0, secs:0, perfect:false, gain:0, fast:false, pts:0, timeAdd:0
 };
 const clearTimers=Shell.clearTimers, later=Shell.later;
 
@@ -1031,9 +1576,10 @@ function ansIndex(g){
 }
 function sumOK(){ return S.cur>=0 && termAt(S.ansIn, curTerm(), ansIndex(S.cur)); }
 function answerTerms(){
-  return S.groups.filter(function(g){ return g.done; })
+  const list=S.groups.filter(function(g){ return g.done; })
     .map(function(g){ return S.p.fams[g.fi].term; })
     .filter(function(t){ return !rZero(t.c); });
+  return S.ordered ? stdSort(list) : list;
 }
 
 /* ============ small rendering pieces ============ */
@@ -1046,12 +1592,11 @@ function chip(inner,cls,attrs){
 }
 function brChip(br,first){
   const o = br.s<0 ? MINUS : (first?"":"+");
-  const inner=Ti(br.a,[V(br.V,1)]), num=Ti(br.bs*br.b,[]);
   return chip(
     (o?'<span class="op">'+o+'</span>':"")
-    + '<span class="brk">'+br.k
+    + '<span class="brk">'+bodyStr(brMult(br))
     + '<span class="paren">(</span>'
-    + termStr(inner,true)+termStr(num,false)
+    + termStr(brInner(br),true)+termStr(brNum(br),false)
     + '<span class="paren">)</span></span>', "");
 }
 
@@ -1128,8 +1673,9 @@ function workLine(){
 function answerLine(){
   const ans=answerTerms();
   if(!ans.length) return "";
+  const cls = (S.reordered && S.phase==="done") ? "slide" : "";
   return '<div class="line answer">'
-    + ans.map(function(t,i){ return chip(termStr(t,i===0),""); }).join("")
+    + ans.map(function(t,i){ return chip(termStr(t,i===0),cls); }).join("")
     + '</div>';
 }
 
@@ -1211,6 +1757,25 @@ function fracHint(f){
   return 'Put them over a common bottom of '+L+' and add the tops: ';
 }
 
+/* what the solve was worth, said plainly and immediately. The xp lands in the
+   same breath as the answer, which is the whole reason it works at all */
+function badges(){
+  const b=[];
+  if(Shell.run.on){
+    b.push('<span class="badge xp">+'+S.pts+' pts</span>');
+    b.push('<span class="badge good">+'+S.timeAdd+'s</span>');
+    if(Shell.run.combo>1) b.push('<span class="badge">&times;'+Shell.mult()+' combo</span>');
+    else if(!S.clean) b.push('<span class="badge">combo lost</span>');
+    return '<div class="badges">'+b.join("")+'</div>';
+  }
+  if(S.perfect)      b.push('<span class="badge good">Perfect &mdash; no slips, no hint</span>');
+  else if(S.clean)   b.push('<span class="badge good">Clean solve</span>');
+  b.push('<span class="badge time'+(S.fast?' good':'')+'">'+S.secs+'s'+(S.fast?' &mdash; fastest yet':'')+'</span>');
+  if(Shell.streak>=2) b.push('<span class="badge">'+Shell.streak+' in a row</span>');
+  if(S.gain)         b.push('<span class="badge xp">+'+S.gain+' xp</span>');
+  return '<div class="badges">'+b.join("")+'</div>';
+}
+
 function renderPrompt(){
   const el=document.getElementById("promptbar"), p=S.p;
   const hintBtn='<button class="link" id="hintBtn">'+(S.hint?"Hide hint":"Hint")+'</button>';
@@ -1219,24 +1784,33 @@ function renderPrompt(){
 
   if(ph==="expand"){
     const many=p.exp.length>2;
+    /* when the thing outside carries a letter, calling it "the number outside"
+       would be the one word a student needs not to hear */
+    const carries=p.disp.some(function(d){ return d.br && d.br.mv && d.br.mv.length; });
     h='<div class="prompt">'+pill(many?"Multiply out both brackets":"Multiply out the bracket")
       + '<span>'+(lean()
           ? 'Multiply through, sign and all.'
-          : 'The number outside multiplies <strong>both</strong> terms inside'
+          : (carries
+              ? 'What sits outside multiplies <strong>both</strong> terms inside &mdash; the letters '
+                + 'as well as the numbers, so the powers add'
+              : 'The number outside multiplies <strong>both</strong> terms inside')
             + (many?', and that goes for each bracket in turn':'')
             + '. Write each result in full, sign and all.')+'</span>'+hintBtn;
     if(S.hint){
       const bits=[];
       p.disp.forEach(function(d){
         if(!d.br) return;
-        const t=brTerms(d.br);
-        bits.push(M(d.br.k+" "+TIMES+" "+bodyStr(Ti(d.br.a,[V(d.br.V,1)])))+" and "
-                + M(d.br.k+" "+TIMES+" "+d.br.b)+" give "
-                + M(plainTerm(t[0])+" "+termText(t[1],false)));
+        const br=d.br, t=brTerms(br);
+        /* the multiplier is quoted with the sign it is actually being applied
+           with, so the hint is true of a subtracted bracket too */
+        const ms=(br.s<0?MINUS:"")+bodyStr(brMult(br));
+        bits.push(M(ms+" "+TIMES+" "+plainTerm(brInner(br)))+" gives "+M(plainTerm(t[0]))
+                + ", and "+M(ms+" "+TIMES+" "+plainTerm(brNum(br)))+" gives "+M(plainTerm(t[1])));
       });
       const neg=p.disp.some(function(d){ return d.br && d.br.s<0; });
       h+='<div class="hintline">'+bits.join("; ")+'. '
-        + (neg?'A bracket that is being taken away hands its minus to <strong>both</strong> terms inside &mdash; every sign in there flips.':'')
+        + (neg?'A bracket that is being taken away hands its minus to <strong>both</strong> terms inside &mdash; every sign in there flips. ':'')
+        + (carries?'A letter times the same letter is that letter squared.':'')
         + '</div>';
     }
     h+='</div>';
@@ -1294,9 +1868,14 @@ function renderPrompt(){
   }
   else if(ph==="done"){
     const n=answerTerms().length;
-    h='<div class="prompt">'+pill("Simplified")
-      + '<span>'+(n ? p.terms.length+' terms became '+n+(n===1?' term':' terms')
-                    : 'Every group cancelled: the whole thing comes to nothing')+'.</span></div>';
+    h='<div class="prompt">'+pill(S.reordered?"Standard form":"Simplified")
+      + '<span>'+(S.reordered
+          ? 'Same answer, written the usual way round: highest power first, then the plain '
+            + 'letters, then the loose number.'
+          : (n ? p.terms.length+' terms became '+n+(n===1?' term':' terms')
+                 + (n>1 ? ', already in standard form' : '')
+               : 'Every group cancelled: the whole thing comes to nothing'))
+        + '.</span>'+badges()+'</div>';
   }
   else if(ph==="check"){
     const v=p.vals, names=Object.keys(v).sort();
@@ -1310,7 +1889,8 @@ function renderPrompt(){
   if(S.miss) h+='<div class="missline">'+S.miss+'</div>';
   else if(S.note) h+='<div class="noteline">'+S.note+'</div>';
   if(ph!=="check" && ph!=="done")
-    h+='<div class="skipwrap"><button class="link" id="skipBtn">Skip</button></div>';
+    h+='<div class="skipwrap"><button class="link" id="skipBtn">Skip'
+     + (Shell.run.on?' &minus;8s':'')+'</button></div>';
   el.innerHTML=h;
 }
 
@@ -1333,12 +1913,46 @@ function setPhase(ph){
   S.si=i; S.phase=ph; S.miss=""; S.shakeI=-1;
   S.firstId = ph==="expand" ? firstEmptyExpand() : null;
   render();
-  if(ph==="done") later(1000,function(){ setPhase("check"); });
+  if(ph!=="done") return;
+  /* the answer is shown in the order it was gathered, held there long enough to
+     be recognised as the student's own, and only then tidied — so the move to
+     standard form reads as a second, separate thing rather than as the page
+     quietly disagreeing with how the work was done. In a run the same beat is
+     played at a third of the length, and the clock is stopped while it plays:
+     the tidying is the page's business, so the page pays for it. */
+  const fast=Shell.run.on;
+  const done=function(){
+    if(Shell.run.on){ Shell.run.pause=false; nextProblem(); }
+    else setPhase("check");
+  };
+  if(!isStd(answerTerms())){
+    later(fast?300:1150,function(){
+      S.ordered=true; S.reordered=true; render();
+      later(fast?620:2100, done);
+    });
+  } else {
+    S.ordered=true;
+    later(fast?520:1150, done);
+  }
 }
 function advance(){ setPhase(S.p.steps[S.si+1]); }
-function finishProblem(){ Shell.solved(S.clean); setPhase("done"); }
+function finishProblem(){
+  S.secs=Math.max(1,Math.round((Date.now()-S.t0)/1000));
+  S.perfect = S.clean && !S.usedHint;
+  const r=Shell.solved(S.clean, S.perfect, S.secs);
+  S.gain=r.gain; S.fast=r.fast;
+  if(Shell.run.on){
+    Shell.run.pause=true;                       /* the clock waits out the flourish */
+    const rr=Shell.runSolve(S.p, S.clean, S.secs);
+    S.pts=rr.pts; S.timeAdd=rr.time;
+  }
+  S.ordered=false; S.reordered=false;
+  setPhase("done");
+}
 function flagMiss(msg){
   if(!msg) return;
+  /* one charge per mistake, not one per press of Enter on the same wrong answer */
+  if(!S.miss) Shell.runMiss();
   S.clean=false; S.miss=msg; renderPrompt(); attach();
   later(4200,function(){ S.miss=""; renderPrompt(); attach(); });
 }
@@ -1414,8 +2028,13 @@ function expandDone(){ return firstEmptyExpand()===null; }
 
 function attach(){
   const hb=document.getElementById("hintBtn");
-  if(hb) hb.onclick=function(){ S.hint=!S.hint; renderPrompt(); attach(); };
-  const sb=document.getElementById("skipBtn"); if(sb) sb.onclick=nextProblem;
+  if(hb) hb.onclick=function(){
+    S.hint=!S.hint;
+    if(S.hint) S.usedHint=true;   /* a hint still counts as clean, just not perfect */
+    renderPrompt(); attach();
+  };
+  const sb=document.getElementById("skipBtn");
+  if(sb) sb.onclick=function(){ Shell.runSkip(); nextProblem(); };
   const nb=document.getElementById("nextBtn"); if(nb) nb.onclick=nextProblem;
 
   document.querySelectorAll("#eq .tm.pick").forEach(function(el){
@@ -1479,15 +2098,23 @@ function missMessage(){
     const id0=firstEmptyExpand();
     if(!id0) return "";
     const j=+id0.slice(1), i=p.exp[j], want=p.terms[i];
-    const br=p.disp.filter(function(d){ return d.br; })[Math.floor(j/2)];
+    /* the wrappers have to be unwrapped: p.disp holds {br:...}, not the bracket */
+    const br=p.disp.filter(function(d){ return d.br; })
+                   .map(function(d){ return d.br; })[Math.floor(j/2)];
+    const out=br ? bodyStr(brMult(br)) : "the multiplier";
     if(signGap(S.expIn[j],want,1)) return signNote(want);
     const q=parseTerm(S.expIn[j]);
     if(q && rEq(q.c,rNeg(want.c))) return "The size is right and the sign is not. That bracket is "
       + (br && br.s<0 ? "being taken away, so every sign inside it flips"
                       : "added, so the signs inside it stay as they are")+".";
+    /* the number came out right but the letters did not: the classic slip when
+       what is outside the bracket carries a letter of its own */
+    if(q && rEq(q.c,want.c) && vsKey(q.vs)!==vsKey(want.vs))
+      return "The number in front is right; the letters are not. "+M(out)+" multiplies the letters "
+        + "as well, so this comes out as "+M(signedBody(want))+".";
     if(br && j%2===1 && q && rEq(rAbs(q.c),R(br.b))) return "That is the number inside the bracket, "
-      + "untouched. The "+br.k+" outside multiplies it too \u2014 both terms, not just the first.";
-    return "Multiply the number outside by each term inside in turn, and write the result with its sign.";
+      + "untouched. The "+M(out)+" outside multiplies it too \u2014 both terms, not just the first.";
+    return "Multiply "+M(out)+" by each term inside in turn, and write the result with its sign.";
   }
   if(ph==="work" && awaiting()){
     const f=grpFam(S.cur), want=curTerm(), q=parseTerm(S.ansIn), n=ansIndex(S.cur);
@@ -1525,8 +2152,9 @@ function fitScale(){
   const room=Shell.room();
   if(!room.w) return;
   const save={si:S.si, phase:S.phase, tag:S.tag.slice(), groups:S.groups.slice(),
-              cur:S.cur, ans:S.ansIn, exp:S.expIn.slice(), gone:S.gone, zap:S.zap};
-  S.gone={}; S.zap=-1;
+              cur:S.cur, ans:S.ansIn, exp:S.expIn.slice(), gone:S.gone, zap:S.zap,
+              ordered:S.ordered, reordered:S.reordered};
+  S.gone={}; S.zap=-1; S.ordered=true; S.reordered=false;
   S.expIn=S.p.exp.map(function(i){ return bodyStr(S.p.terms[i]); });
   const n=S.p.fams.length;
   const pose=function(live){
@@ -1554,6 +2182,7 @@ function fitScale(){
   pose(-1); shot("check",checkHTML());
   S.si=save.si; S.phase=save.phase; S.tag=save.tag; S.groups=save.groups;
   S.cur=save.cur; S.ansIn=save.ans; S.expIn=save.exp; S.gone=save.gone; S.zap=save.zap;
+  S.ordered=save.ordered; S.reordered=save.reordered;
   /* below this the writing stops being worth reading, and the page can scroll
      sideways instead */
   Shell.scale=Math.max(raw,0.58);
@@ -1569,6 +2198,8 @@ function begin(fl){
   S.groups=[]; S.cur=-1; S.ansIn=""; S.gone={}; S.zap=-1;
   S.expIn=S.p.exp.map(function(){ return ""; });
   S.miss=""; S.note=""; S.hint=false; S.clean=true; S.shakeI=-1;
+  S.ordered=false; S.reordered=false; S.usedHint=false;
+  S.secs=0; S.perfect=false; S.gain=0; S.fast=false; S.pts=0; S.timeAdd=0; S.t0=Date.now();
   S.si=0; S.phase=S.p.steps[0];
   fitScale();
   setPhase(S.p.steps[0]);
