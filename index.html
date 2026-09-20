@@ -1,868 +1,296 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Combining Like Terms</title>
+<title>Combine Like Terms 1</title>
 <style>
   :root{
-    --ink:#0f172a; --line:#1e293b; --muted:#64748b; --faint:#94a3b8;
-    --blue:#1d4ed8; --blue-b:#3b82f6; --blue-bg:#eff6ff;
-    --green:#059669; --green-bg:#ecfdf5;
-    --rose:#e11d48; --rose-bg:#fff1f2;
-    --page:#f8fafc; --edge:#e2e8f0;
-
-    /* one colour per family of like terms. The colour is the whole idea of the
-       drill made visible: terms that can be added share a colour, terms that
-       cannot never do */
-    --c0:#1d4ed8; --b0:#eff6ff; --e0:#bfdbfe;
-    --c1:#7c3aed; --b1:#f5f3ff; --e1:#ddd6fe;
-    --c2:#0d9488; --b2:#f0fdfa; --e2:#99f6e4;
-    --c3:#b45309; --b3:#fffbeb; --e3:#fde68a;
+    --page:#fbfcfe; --ink:#172033; --soft:#7a8599; --faint:#c3cad6;
+    --rule:#d7e1f0; --pen:#d4386c; --pen-soft:#f7d6e1;
+    --ok:#10875a; --bad:#d1243f;
+    --f0:#2358d8; --f1:#7a3fe0; --f2:#0c8577; --f3:#b3620a;
+    --u0:#dbe6fd; --u1:#ebe1fc; --u2:#d4efeb; --u3:#f8e6cf;
+    --btn:#172033; --btn-ink:#fff; --field:#fff; --edge:#e2e7ef;
+    --tp2:#4f7bd4; --tp1:#72a84c; --tp0:#f4c534; --tpy:#9468d6; --tpyy:#c255a8; --tpxy:#1f9e8f; --tn:#e3402b; --tedge:#1b2233;
+    --math:Verdana,Geneva,"DejaVu Sans",sans-serif;
+    --ui:Verdana,Geneva,"DejaVu Sans",sans-serif;
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --page:#12161f; --ink:#e7ebf3; --soft:#8d97aa; --faint:#465064;
+      --rule:#2a3446; --pen:#ff6b9a; --pen-soft:#4a2433;
+      --ok:#3ecf8e; --bad:#ff5c73;
+      --f0:#7aa2ff; --f1:#b894ff; --f2:#4fd1bf; --f3:#f2a74b;
+      --u0:#1e2c4d; --u1:#2e2349; --u2:#153a36; --u3:#3d2c14;
+      --btn:#e7ebf3; --btn-ink:#12161f; --field:#1a202c; --edge:#2a3242;
+    }
+  }
+  :root[data-theme="dark"]{
+    --page:#12161f; --ink:#e7ebf3; --soft:#8d97aa; --faint:#465064;
+    --rule:#2a3446; --pen:#ff6b9a; --pen-soft:#4a2433;
+    --ok:#3ecf8e; --bad:#ff5c73;
+    --f0:#7aa2ff; --f1:#b894ff; --f2:#4fd1bf; --f3:#f2a74b;
+    --u0:#1e2c4d; --u1:#2e2349; --u2:#153a36; --u3:#3d2c14;
+    --btn:#e7ebf3; --btn-ink:#12161f; --field:#1a202c; --edge:#2a3242;
   }
   *{box-sizing:border-box;}
-  /* the writing is sized to be read, not to be squeezed into one screen. If a
-     problem runs past the bottom of the window the page scrolls, which costs a
-     flick of the thumb and buys back a font a student can actually see */
-  html,body{height:auto;margin:0;}
-  body{
-    background:var(--page); color:var(--ink);
-    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-    -webkit-font-smoothing:antialiased;
-  }
-  .app{min-height:100vh;display:flex;flex-direction:column;padding:12px 16px 32px;}
-  .wrap{width:100%;max-width:70rem;margin:0 auto;display:flex;flex-direction:column;}
+  html,body{margin:0;}
+  body{background:var(--page);color:var(--ink);font-family:var(--ui);
+       -webkit-font-smoothing:antialiased;min-height:100vh;}
 
-  /* nav tabs */
-  .nav-tabs{display:flex;gap:6px;margin-bottom:12px;border-bottom:2px solid var(--edge);
-            padding-bottom:2px;overflow-x:auto;scrollbar-width:thin;}
-  .tab-btn{
-    background:none; border:none; padding:9px 14px; font-size:1rem; font-weight:600;
-    color:var(--muted); cursor:pointer; border-radius:6px 6px 0 0; transition:all .15s ease;
-    white-space:nowrap;
-  }
-  .tab-btn:hover{color:var(--ink); background:var(--edge);}
-  .tab-btn.active{color:var(--blue); border-bottom:3px solid var(--blue); background:#fff;}
-  .tab-btn sup{font-size:.62em;vertical-align:super;line-height:0;}
+  .topbar{display:flex;align-items:center;gap:8px;max-width:64rem;margin:0 auto;
+       padding:14px 18px;}
+  .sel{position:relative;}
+  select{appearance:none;-webkit-appearance:none;font:inherit;font-size:1rem;color:var(--ink);
+         background:var(--field);border:1px solid var(--edge);border-radius:10px;
+         padding:9px 38px 9px 14px;cursor:pointer;}
+  select:focus-visible,.icon:focus-visible,.next:focus-visible{outline:2px solid var(--pen);outline-offset:2px;}
+  .sel::after{content:"";position:absolute;right:15px;top:50%;width:7px;height:7px;margin-top:-6px;
+              border-right:2px solid var(--soft);border-bottom:2px solid var(--soft);
+              transform:rotate(45deg);pointer-events:none;}
+  .grow{flex:1;}
+  .icon{width:40px;height:40px;display:grid;place-items:center;border:none;border-radius:10px;
+        background:none;color:var(--soft);cursor:pointer;}
+  .icon:hover{color:var(--ink);background:var(--edge);}
+  .icon svg{width:21px;height:21px;}
 
-  /* header */
-  .top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 16px;flex-shrink:0;}
-  h1{font-size:1.2rem;font-weight:600;text-transform:uppercase;letter-spacing:.18em;margin:0;}
-  .levels{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
-  .score{font-size:.88rem;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap;}
-  .score b{color:var(--green);}
-  /* the scaffolding thins out on a run, and the header says so rather than
-     letting the wording quietly change underfoot */
-  .lean{font-size:.76rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
-        color:var(--muted);background:var(--edge);border-radius:999px;padding:2px 9px;white-space:nowrap;}
-  .tally{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;font-size:.82rem;
-         color:var(--faint);font-variant-numeric:tabular-nums;}
-  .tally span{white-space:nowrap;}
-  .tally b{color:var(--muted);font-weight:600;}
-  .tally sup{font-size:.62em;vertical-align:super;line-height:0;}
+  /* ---- the page of working ---- */
+  .desk{max-width:64rem;margin:0 auto;padding:4vh 18px 40px;display:flex;flex-direction:column;align-items:center;}
+  .scroll{max-width:100%;overflow-x:auto;overflow-y:visible;padding:0 4px 8px;}
+  .work{position:relative;display:inline-block;min-width:min(14em,100%);
+        font-family:var(--math);font-size:clamp(1.4rem,4.4vw,2.2rem);line-height:1.3;cursor:text;}
+  .row{display:flex;align-items:flex-end;white-space:nowrap;}
+  .gut{flex:0 0 1.15em;color:var(--soft);}
+  .txt{flex:1;display:flex;align-items:baseline;min-height:1.55em;padding:.12em 0;}
+  .row.p .txt{padding-top:1.9em;}          /* room for the arrows */
+  .row.w .txt{border-bottom:1.5px solid var(--rule);}
+  .row + .row{margin-top:.35em;}
 
-  /* work area */
-  .ghost{position:absolute;left:-10000px;top:0;visibility:hidden;pointer-events:none;width:max-content;}
-  .main{display:flex;flex-direction:column;gap:0;padding-top:8px;}
-  .work{min-width:0;display:flex;flex-direction:column;align-items:center;
-        align-items:safe center;justify-content:flex-start;padding:18px 0 6px;}
-  /* the working and the panel under it scale together as one block, so the size is
-     set once per problem and nothing shifts underfoot part-way through a solve */
-  .stagebox{display:flex;justify-content:center;align-items:flex-start;flex-shrink:0;}
-  .stage{display:flex;flex-direction:column;align-items:center;gap:16px;transform-origin:top center;}
+  .t{display:inline-block;padding:0 .08em;
+     transition:color .25s,background .25s;}
+  .op{margin:0 .28em;}
+  .t.first .op{margin-left:0;margin-right:.06em;}
+  .work i{font-style:italic;}
+  .work sup{font-size:.6em;line-height:0;vertical-align:.72em;margin-left:.04em;}
+  .paren{margin:0 .04em;}
+  .dfrac{display:inline-flex;flex-direction:column;align-items:center;vertical-align:.42em;
+         font-size:.62em;line-height:1.05;margin:0 .1em;}
+  .dfrac .nu,.dfrac .de{padding:0 .15em;}
+  .dfrac .fbar{align-self:stretch;border-top:1.5px solid currentColor;margin:.08em 0;padding:0;}
 
-  /* an expression is one line of terms, not two sides of an equals, so the
-     working is a stack of centred lines rather than a three-column grid */
-  .eq{display:flex;flex-direction:column;align-items:center;gap:0;
-      font-family:Georgia,"Times New Roman",serif;font-size:2.2rem;}
-  .line{display:flex;align-items:center;justify-content:center;flex-wrap:nowrap;
-        gap:4px;min-height:4.3rem;white-space:nowrap;}
-  .line.quiet{color:var(--faint);}
-  .line.answer{color:var(--green);}
+  .on{color:var(--pen);}
+  .c0{color:var(--f0);} .c1{color:var(--f1);}
+  .c2{color:var(--f2);} .c3{color:var(--f3);}
+  .h0{text-decoration:underline dotted var(--f0);text-underline-offset:.2em;text-decoration-thickness:.08em;} .h1{text-decoration:underline dotted var(--f1);text-underline-offset:.2em;text-decoration-thickness:.08em;}
+  .h2{text-decoration:underline dotted var(--f2);text-underline-offset:.2em;text-decoration-thickness:.08em;} .h3{text-decoration:underline dotted var(--f3);text-underline-offset:.2em;text-decoration-thickness:.08em;}
+  .t.pick{cursor:pointer;}
+  .t.pick:hover{text-decoration:underline;text-decoration-color:var(--faint);text-underline-offset:.2em;text-decoration-thickness:.06em;}
+  .t.chosen{cursor:pointer;text-decoration:underline;text-underline-offset:.2em;text-decoration-thickness:.07em;}
+  .t.used{opacity:.5;}
+  .t:focus-visible{outline:2px solid var(--pen);outline-offset:2px;}
+  .t.shake{animation:shake .35s;color:var(--bad);}
+  .gone{color:var(--faint);text-decoration:line-through;text-decoration-thickness:.07em;}
+  .pop{animation:pop .3s ease-out;}
+  @keyframes pop{from{opacity:0;transform:translateY(.15em);}to{opacity:1;transform:none;}}
 
-  /* a term carries its own sign. Colouring the chip colours the sign with it,
-     because the sign in front of a term belongs to that term and travels with
-     it everywhere the term goes */
-  .tm{display:inline-flex;align-items:center;gap:6px;border:2px solid transparent;
-      border-radius:9px;padding:2px 8px;background:none;color:inherit;
-      font-family:inherit;font-size:inherit;line-height:1.25;}
-  .tm sup{font-size:.58em;vertical-align:super;line-height:0;}
-  .tm.pick{cursor:pointer;}
-  .tm.pick:hover{background:#eef2f7;}
-  .tm.pick:focus-visible{outline:3px solid var(--blue-b);outline-offset:2px;}
-  .tm.t0{color:var(--c0);background:var(--b0);border-color:var(--e0);}
-  .tm.t1{color:var(--c1);background:var(--b1);border-color:var(--e1);}
-  .tm.t2{color:var(--c2);background:var(--b2);border-color:var(--e2);}
-  .tm.t3{color:var(--c3);background:var(--b3);border-color:var(--e3);}
-  .tm.grow{animation:grow .3s ease-out;}
-  .tm.shake{animation:shake .34s;border-color:#fb7185;background:var(--rose-bg);color:var(--rose);}
-  .tm.dim{opacity:.42;}
-  /* a group that came to nothing is struck out and then goes, and the line
-     closes up behind it. Seeing the pair leave is the whole lesson of a
-     cancelling group, so it is worth a beat of watching */
-  .tm.zap{text-decoration:line-through;text-decoration-thickness:3px;
-          animation:zap 1.15s ease-in forwards;}
-  @keyframes zap{0%,30%{opacity:1;transform:none;}100%{opacity:0;transform:scale(.8);}}
+  /* what the student is typing, and the pencil-point where it goes */
+  .mir{display:inline-block;}
+  .mir.gap{margin-left:.4em;}
+  .mir.bad{color:var(--bad);}
+  .mir.shake{animation:shake .35s;color:var(--bad);}
+  .caret{display:inline-block;width:2px;height:1.05em;background:var(--pen);margin:0 1px;
+         vertical-align:-.16em;animation:blink 1.05s steps(1) infinite;}
+  .work:not(.focus) .caret{animation:none;opacity:.35;}
+  .ghost{color:var(--faint);}
+  .mir .pend{color:var(--faint);}
+  .tick{color:var(--ok);margin-left:.45em;font-family:var(--ui);font-size:.8em;animation:pop .3s ease-out;}
+  @keyframes blink{50%{opacity:0;}}
+  @keyframes shake{0%,100%{transform:none;}25%{transform:translateX(-.12em);}75%{transform:translateX(.12em);}}
 
-  .brk{display:inline-flex;align-items:center;gap:5px;}
-  .paren{color:var(--line);font-size:1.25em;line-height:1;}
+  svg.arrows{position:absolute;left:0;top:0;width:100%;height:100%;overflow:visible;pointer-events:none;}
+  svg.arrows path{fill:none;stroke-linecap:round;}
+  svg.arrows .now{stroke:var(--pen);stroke-width:2.4;}
+  svg.arrows .was{stroke:var(--faint);stroke-width:1.6;}
+  svg.arrows .draw{animation:draw .4s ease-out forwards;}
+  @keyframes draw{to{stroke-dashoffset:0;}}
 
-  /* a fraction in front of a letter is written the way it is written by hand,
-     one number over another, not with a slash */
-  .dfrac{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;
-         line-height:1.08;margin:0 2px;font-size:.7em;}
-  .dfrac > .t,.dfrac > .b{padding:0 4px;}
-  .dfrac > .bar{width:100%;min-width:1.1rem;border-top:2px solid currentColor;margin:2px 0;}
+  /* the real input sits over the working, invisible: tapping anywhere puts
+     the pencil down, and phones get their keyboard */
+  #key{position:absolute;pointer-events:none;inset:0;width:100%;height:100%;opacity:0;border:0;padding:0;margin:0;
+       font-size:16px;color:transparent;background:transparent;caret-color:transparent;cursor:text;}
 
-  /* the group being built gets restated on its own line, with the box that
-     takes its total on the end. The terms come down in the order they are
-     picked, which is the student's order */
-  .line.work{gap:6px;}
-  .eqs{color:var(--faint);margin:0 12px;}
-  .waiting{color:var(--faint);font-size:.55em;letter-spacing:.06em;text-transform:uppercase;
-           font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;}
+  .t.hold{visibility:hidden;}
+  .note{margin-top:1.4rem;font-size:1.05rem;color:var(--pen);visibility:hidden;}
+  .note{max-width:34rem;text-align:center;line-height:1.5;}
+  .note b{font-size:1.2em;}
+  .note .m{color:var(--ink);white-space:nowrap;}
+  .note sup{font-size:.7em;vertical-align:.5em;line-height:0;}
+  .note.show{visibility:visible;animation:pop .25s ease-out;}
+  .next{margin-top:1rem;font:inherit;font-size:1.05rem;font-weight:700;border:none;border-radius:10px;
+        padding:11px 30px;background:var(--btn);color:var(--btn-ink);cursor:pointer;visibility:hidden;}
+  .next.show{visibility:visible;animation:pop .3s ease-out;}
 
-  .hide{visibility:hidden;}
-  .blue{color:var(--blue);}
-  .green{color:var(--green);}
-  .faint{color:var(--faint);}
-  @keyframes grow{from{opacity:0;transform:translateY(-6px);}to{opacity:1;transform:none;}}
-  @keyframes shake{0%,100%{transform:none;}25%{transform:translateX(-5px);}75%{transform:translateX(5px);}}
+  /* ---- header ---- */
+  .head{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 14px;}
+  .dtitle{margin:0;font-size:1.15rem;font-weight:700;color:var(--ink);}
+  .count{color:var(--soft);font-size:.95rem;}
+  .tilink{font:inherit;font-size:.9rem;background:none;border:none;padding:2px 4px;color:var(--f0);
+          text-decoration:underline;cursor:pointer;}
+  .tilink[hidden]{display:none;}
 
-  /* inputs */
-  .box{height:3.1rem;width:4.3rem;border:2px solid var(--blue-b);background:var(--blue-bg);color:var(--blue);
-       border-radius:7px;text-align:center;font-family:Georgia,"Times New Roman",serif;font-size:1.85rem;
-       outline:none;transition:border-color .15s,background .15s;}
-  .box.term{width:6.6rem;}
-  .box:focus{border-color:var(--blue);background:#fff;}
-  .box.ok{border-color:#10b981;background:var(--green-bg);color:var(--green);}
-  /* an empty box wears the colour of the group it belongs to, so it is obvious
-     which pile of terms it is waiting on */
-  .box.g0{border-color:var(--e0);background:var(--b0);color:var(--c0);}
-  .box.g1{border-color:var(--e1);background:var(--b1);color:var(--c1);}
-  .box.g2{border-color:var(--e2);background:var(--b2);color:var(--c2);}
-  .box.g3{border-color:var(--e3);background:var(--b3);color:var(--c3);}
+  /* ---- turning it in ---- */
+  .turnin{position:fixed;inset:0;z-index:100;overflow:auto;background:var(--page);}
+  .turnin[hidden]{display:none;}
+  .ti-inner{max-width:640px;margin:clamp(12px,4vh,40px) auto;padding:26px clamp(18px,4vw,34px) 30px;
+            background:var(--field);border:1px solid var(--edge);border-radius:14px;}
+  .ti-inner h2{margin:0 0 6px;font-size:1.5rem;}
+  .ti-sub{color:var(--soft);line-height:1.55;margin:0 0 18px;}
+  .ti-recap{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;}
+  .ti-recap>div{border:1.5px solid var(--edge);border-radius:10px;padding:10px 14px;color:var(--soft);font-size:.85rem;}
+  .ti-recap b{display:block;color:var(--ink);font-size:1.5rem;}
+  .ti-log{max-height:260px;overflow:auto;margin-top:16px;padding:6px 0;
+          border-top:1.5px solid var(--edge);border-bottom:1.5px solid var(--edge);}
+  .ti-row{display:flex;gap:10px;align-items:baseline;padding:5px 2px;}
+  .ti-n{color:var(--soft);min-width:28px;text-align:right;font-size:.85rem;}
+  .ti-q{flex:1;min-width:0;}
+  .ti-k{font-size:.8rem;white-space:nowrap;color:var(--ok);}
+  .ti-k.retry{color:var(--f3);}
+  #gform{margin-top:20px;}
+  #gform[hidden]{display:none;}
+  .ti-warn{background:var(--u3);border-radius:10px;padding:11px 14px;margin-bottom:18px;line-height:1.55;font-size:.92rem;}
+  .ti-field{margin-bottom:14px;}
+  .ti-field label{display:block;margin-bottom:6px;}
+  .ti-field label em{font-style:normal;color:var(--soft);font-size:.88rem;}
+  .ti-num{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;margin-right:8px;
+          border-radius:50%;background:var(--btn);color:var(--btn-ink);font-size:.8rem;}
+  .ti-field input{font:inherit;font-size:1.05rem;color:var(--ink);width:100%;border:1.5px solid var(--edge);
+          border-radius:10px;padding:9px 12px;background:var(--page);}
+  .ti-field input:focus{outline:2px solid var(--pen);outline-offset:1px;}
+  .ti-check{border:1.5px solid var(--edge);border-radius:10px;padding:11px 14px;margin:4px 0 16px;}
+  .ti-check .hd{color:var(--soft);font-size:.88rem;margin-bottom:8px;}
+  .ti-check .r{display:flex;gap:12px;align-items:baseline;margin-bottom:4px;}
+  .ti-check .r:last-child{margin-bottom:0;padding-top:6px;border-top:1.5px solid var(--edge);}
+  .ti-check .t{color:var(--soft);min-width:88px;font-size:.85rem;}
+  .ti-check .v.empty{color:var(--faint);}
+  .ti-btn{font:inherit;font-weight:700;border:none;border-radius:10px;padding:11px 26px;
+          background:var(--btn);color:var(--btn-ink);cursor:pointer;}
+  .ti-feedback{margin-top:14px;min-height:1.2em;}
+  .ti-feedback .ok{color:var(--ok);}
+  .ti-feedback .nt{color:var(--soft);}
+  .ti-after{margin-top:20px;padding-top:16px;border-top:1.5px solid var(--edge);display:flex;gap:12px;
+            align-items:center;flex-wrap:wrap;color:var(--soft);}
+  .ti-ghost{font:inherit;border:1px solid var(--edge);border-radius:10px;padding:8px 16px;background:none;
+            color:var(--ink);cursor:pointer;}
 
-  /* the panel that sits under the working */
-  .checkline{width:100%;text-align:center;font-family:Georgia,serif;font-size:1.5rem;line-height:2;
-             white-space:nowrap;}
-  .checkline .orig{color:var(--faint);}
-  .checkline .sub{margin-top:6px;}
-  .checkline sup{font-size:.58em;vertical-align:super;line-height:0;}
-  .checkline .val{color:var(--green);}
+  /* ---- algebra tiles ---- */
+  .icon[hidden]{display:none;}
+  .icon[aria-pressed="false"]{opacity:.45;}
+  .tiles{margin-top:2.2rem;display:flex;flex-wrap:wrap;justify-content:center;align-items:flex-start;
+         gap:1.6rem 2.6rem;width:100%;max-width:100%;--u:clamp(18px,3.6vw,24px);}
+  .tiles[hidden]{display:none;}
+  .fam{display:flex;flex-direction:column;gap:.5rem;}
+  .trow{display:flex;flex-wrap:wrap;gap:6px;padding:4px;border-radius:6px;max-width:min(90vw,38rem);
+}
+  .tile{display:grid;place-items:center;box-sizing:border-box;border:2px solid var(--tedge);color:#fff;
+        font-family:var(--ui);line-height:1;user-select:none;white-space:nowrap;
+        transition:transform .3s ease-in,opacity .3s ease-in,box-shadow .2s;}
+  .tile i{font-style:italic;}
+  .tile sup{font-size:.6em;vertical-align:.6em;line-height:0;}
+  .tile.kxx{background:var(--tp2);} .tile.kx{background:var(--tp1);}
+  .tile.k1{background:var(--tp0);color:#3a2a00;}
+  .tile.ky{background:var(--tpy);} .tile.kyy{background:var(--tpyy);} .tile.kxy{background:var(--tpxy);}
+  .tile.frac{border-width:1.5px;}
+  .tile.nolab span{display:none;}
+  .tile.neg{background:var(--tn);color:#fff;}
+  .tile.meet{transform:scale(1.1);box-shadow:0 3px 10px rgba(0,0,0,.25);transition:transform .18s ease-out,box-shadow .18s;}
+  .tile{position:relative;}
+  .tile.mover{z-index:3;box-shadow:0 6px 14px rgba(0,0,0,.3);}
+  .tile.stacked{box-shadow:0 0 0 3px var(--pen);}
+  .tile.out{transform:scale(.15);opacity:0;}
+  .fam{transition:opacity .4s,filter .4s;}
+  .fam.dim{opacity:.3;filter:grayscale(1);}
+  .tile.vanished,.trow.spent,.fam.spent,.trow.hid,.fam.hid{display:none;}
+  .trow.show{animation:pop .3s ease-out;}
 
-  /* prompt bar */
-  /* fixed height on purpose: a hint or a nudge appearing must not change how much
-     room the working has, or the writing would resize mid-problem */
-  .promptbar{width:100%;flex-shrink:0;min-height:6.4rem;border-bottom:1px solid var(--edge);
-             padding:0 0 10px 0;--ps:1;
-             display:flex;flex-wrap:wrap;align-items:flex-start;column-gap:16px;row-gap:4px;}
-  .prompt{flex:1 1 26rem;min-width:0;
-          display:flex;flex-wrap:wrap;align-items:center;gap:6px 9px;color:#334155;
-          font-size:calc(1.15rem*var(--ps));line-height:1.5;}
-  .tagline{margin-bottom:0;}
-  .skipwrap{margin-left:auto;align-self:center;}
-  .prompt .math{font-family:Georgia,serif;}
-  .prompt .math sup,.hintline .math sup{font-size:.6em;vertical-align:super;line-height:0;}
-  .prompt strong{font-weight:600;}
-  .tag{display:inline-block;font-size:calc(.8rem*var(--ps,1));font-weight:700;letter-spacing:.09em;text-transform:uppercase;
-       color:var(--blue);background:var(--blue-bg);border:1px solid #bfdbfe;border-radius:999px;
-       padding:3px 11px;white-space:nowrap;}
-  .count{font-size:calc(.84rem*var(--ps,1));color:var(--faint);font-variant-numeric:tabular-nums;}
-  .link{background:none;border:none;padding:0;color:var(--muted);font-size:calc(1rem*var(--ps,1));font-family:inherit;
-        text-decoration:underline;text-underline-offset:4px;cursor:pointer;}
-  .link:hover{color:var(--ink);}
-  .hintline{width:100%;font-size:calc(1rem*var(--ps,1));color:#475569;display:flex;flex-wrap:wrap;align-items:center;gap:6px;}
-  .hintline .math{font-family:Georgia,serif;}
-  .missline{flex:1 1 100%;margin-top:3px;font-size:calc(1rem*var(--ps,1));color:var(--rose);}
-  .noteline{width:100%;margin-top:3px;font-size:calc(1rem*var(--ps,1));color:var(--muted);}
-  .next{background:var(--ink);color:#fff;border:none;border-radius:8px;padding:9px 20px;
-        font-size:calc(1.05rem*var(--ps,1));font-weight:500;cursor:pointer;font-family:inherit;white-space:nowrap;}
-  .next:hover{background:#1e293b;}
-
-  /* ---- the parts that make a student want one more ----
-     A drill is practised because the next problem is wanted, not because it is
-     assigned. Everything below exists to make the next problem wanted: a bar
-     that is nearly full, a streak that is nearly a record, a row of dots with
-     one dot missing. None of it changes the mathematics; all of it changes how
-     long a student stays. */
-  .progress{display:flex;align-items:center;gap:10px;margin:6px 0 0;}
-  .pbar{flex:1 1 auto;height:8px;border-radius:999px;background:var(--edge);overflow:hidden;min-width:70px;}
-  .pbar i{display:block;height:100%;width:0;border-radius:999px;
-          background:linear-gradient(90deg,var(--blue-b),var(--c1));transition:width .5s ease;}
-  .pmeta{display:flex;align-items:center;gap:8px;font-size:.78rem;color:var(--muted);
-         font-variant-numeric:tabular-nums;white-space:nowrap;}
-  .pmeta b{color:var(--ink);}
-  .rank{font-size:.7rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;
-        color:var(--c1);background:var(--b1);border:1px solid var(--e1);border-radius:999px;padding:2px 9px;}
-  /* the streak is the loudest thing on the page once it is long, because a long
-     streak is the thing a student is trying not to break */
-  .flame{font-size:.82rem;font-weight:700;border-radius:999px;padding:2px 11px;white-space:nowrap;
-         color:var(--muted);background:var(--edge);border:1px solid transparent;transition:all .2s ease;}
-  .flame.on{color:var(--blue);background:var(--blue-bg);border-color:#bfdbfe;}
-  .flame.hot{color:#b45309;background:#fffbeb;border-color:#fde68a;}
-  .flame.blaze{color:#fff;background:linear-gradient(90deg,#f97316,#e11d48);border-color:transparent;
-               animation:pulse 1.6s ease-in-out infinite;}
-  @keyframes pulse{0%,100%{transform:none;}50%{transform:scale(1.05);}}
-  .pb{font-size:.78rem;color:var(--faint);font-variant-numeric:tabular-nums;white-space:nowrap;}
-
-  /* one row per kind of problem, five dots each. An unfinished row is an itch */
-  .mastery{display:flex;flex-wrap:wrap;gap:5px 16px;margin-top:7px;font-size:.75rem;color:var(--faint);}
-  .mrow{display:inline-flex;align-items:center;gap:5px;white-space:nowrap;}
-  .pip{width:7px;height:7px;border-radius:50%;background:var(--edge);display:inline-block;}
-  .pip.on{background:var(--green);}
-  .mrow.mastered{color:var(--green);font-weight:600;}
-  .mrow.mastered .pip.on{background:var(--green);box-shadow:0 0 0 2px var(--green-bg);}
-
-  .toast{position:fixed;left:50%;top:14px;transform:translateX(-50%) translateY(-20px);
-         background:var(--ink);color:#fff;border-radius:999px;padding:10px 22px;font-size:.95rem;
-         font-weight:600;box-shadow:0 10px 28px rgba(15,23,42,.3);
-         opacity:0;pointer-events:none;transition:opacity .25s ease,transform .25s ease;z-index:40;white-space:nowrap;}
-  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
-
-  .badges{display:flex;flex-wrap:wrap;gap:6px;width:100%;margin-top:5px;}
-  .badge{font-size:.8rem;font-weight:600;border-radius:999px;padding:2px 11px;white-space:nowrap;
-         border:1px solid var(--edge);background:#fff;color:var(--muted);animation:grow .3s ease-out;}
-  .badge.good{border-color:var(--e2);background:var(--b2);color:var(--c2);}
-  .badge.time{border-color:#bfdbfe;background:var(--blue-bg);color:var(--blue);}
-  .badge.xp{border-color:var(--e1);background:var(--b1);color:var(--c1);}
-  /* the answer sliding into standard form is worth seeing happen */
-  .line.answer .tm.slide{animation:grow .4s ease-out;}
-
-  /* ---- Run mode ----
-     A drill without stakes is homework. The clock is the whole design: it is
-     always visible, always falling, and the only way to keep it up is to solve
-     faster than it drains. That turns every problem from a task into a decision
-     about how hard to push, which is the thing that makes people say one more. */
-  .tab-btn.runtab{color:#fff;background:linear-gradient(90deg,#f97316,#e11d48);
-                  border-radius:6px;margin-right:12px;position:relative;}
-  .tab-btn.runtab::after{content:"";position:absolute;right:-7px;top:18%;height:64%;
-                         border-right:1px solid var(--edge);}
-  .tab-btn.runtab:hover{color:#fff;filter:brightness(1.07);}
-  .tab-btn.runtab.active{color:#fff;border-bottom:3px solid #e11d48;}
-
-  .runhud{display:flex;align-items:center;gap:14px;flex-wrap:wrap;width:100%;}
-  .clock{position:relative;display:flex;flex-direction:column;gap:4px;min-width:9rem;flex:0 0 auto;}
-  .clkrow{display:flex;align-items:baseline;gap:8px;}
-  .clktxt{font-family:Georgia,serif;font-size:2rem;font-weight:600;line-height:1;
-          font-variant-numeric:tabular-nums;color:var(--ink);transition:color .2s;}
-  .clklbl{font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);}
-  .clkbar{height:7px;border-radius:999px;background:var(--edge);overflow:hidden;}
-  .clkbar i{display:block;height:100%;border-radius:999px;background:var(--green);
-            transition:width .12s linear,background .3s;}
-  .clock.low .clktxt{color:#b45309;}
-  .clock.low .clkbar i{background:#f59e0b;}
-  .clock.crit .clktxt{color:var(--rose);animation:pulse .6s ease-in-out infinite;}
-  .clock.crit .clkbar i{background:var(--rose);}
-  /* the time a solve buys back, said where the time lives */
-  .tpop{position:absolute;right:-6px;top:-4px;font-size:1.05rem;font-weight:700;
-        color:var(--green);pointer-events:none;animation:tfly .9s ease-out forwards;}
-  .tpop.bad{color:var(--rose);}
-  @keyframes tfly{0%{opacity:0;transform:translateY(6px);}
-                  25%{opacity:1;transform:translateY(-2px);}
-                  100%{opacity:0;transform:translateY(-22px);}}
-
-  .rstat{display:flex;flex-direction:column;gap:1px;}
-  .rstat b{font-size:1.35rem;line-height:1.1;font-variant-numeric:tabular-nums;}
-  .rstat span{font-size:.66rem;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);}
-  .rstat.combo b{color:var(--c1);}
-  .rstat.combo.hi b{background:linear-gradient(90deg,#f97316,#e11d48);
-                    -webkit-background-clip:text;background-clip:text;color:transparent;}
-  .bump{animation:bump .32s ease-out;}
-  @keyframes bump{0%{transform:none;}40%{transform:scale(1.28);}100%{transform:none;}}
-  .tier{margin-left:auto;font-size:.72rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;
-        color:var(--muted);background:var(--edge);border-radius:999px;padding:3px 11px;white-space:nowrap;}
-
-  /* the results card. Big number, three facts, and a button under the thumb */
-  .over{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0 2px;
-        font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;}
-  .ovs{font-family:Georgia,serif;font-size:4.2rem;line-height:1;font-weight:600;
-       font-variant-numeric:tabular-nums;color:var(--ink);animation:grow .4s ease-out;}
-  .ovl{font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;color:var(--faint);margin-bottom:14px;}
-  .ovrow{display:flex;flex-wrap:wrap;justify-content:center;gap:10px 26px;}
-  .ovcell{display:flex;flex-direction:column;align-items:center;gap:1px;}
-  .ovcell b{font-size:1.5rem;font-variant-numeric:tabular-nums;}
-  .ovcell span{font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);}
-  .ovbest{margin-top:14px;font-size:.95rem;font-weight:600;color:var(--green);
-          background:var(--green-bg);border:1px solid #a7f3d0;border-radius:999px;padding:5px 16px;}
-  .ovbest.miss{color:var(--muted);background:var(--edge);border-color:transparent;font-weight:500;}
-  .ovkinds{margin-top:12px;font-size:.8rem;color:var(--faint);text-align:center;max-width:34rem;}
-  .go{background:linear-gradient(90deg,#f97316,#e11d48);color:#fff;border:none;border-radius:9px;
-      padding:11px 26px;font-size:1.1rem;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;}
-  .go:hover{filter:brightness(1.07);}
-  .kbd{font-size:.78rem;color:var(--faint);margin-left:10px;white-space:nowrap;}
-
-  @media (max-width:860px){
-    .clktxt{font-size:1.7rem;} .clock{min-width:7.5rem;}
-    .rstat b{font-size:1.15rem;} .runhud{gap:10px;}
-    .ovs{font-size:3.2rem;}
-  }
-
-  @media (max-width:1150px){ .main{padding-top:6px;} }
-  /* a narrow screen still gets the larger writing — it just gets more of the
-     scrolling that pays for it */
-  @media (max-width:860px){
-    .tab-btn{padding:7px 11px;font-size:.9rem;}
-    .eq{font-size:1.85rem;}
-    .line{min-height:3.6rem;}
-    .eqs{margin:0 7px;}
-    h1{font-size:1.02rem;}
-    .checkline{font-size:1.2rem;line-height:1.9;}
-    .box{height:2.7rem;width:3.7rem;font-size:1.55rem;}
-    .box.term{width:5.7rem;}
-    .promptbar{--ps:.95;}
-  }
   @media (prefers-reduced-motion:reduce){
-    .tm.grow,.tm.shake{animation:none;}
+    .pop,.tick,.next.show,.mir.shake,svg.arrows .draw{animation:none;}
+    svg.arrows .draw{stroke-dashoffset:0 !important;}
+    .caret{animation:none;}
   }
 </style>
 </head>
 <body>
-<div class="app">
-  <div class="wrap">
-    <div class="nav-tabs" id="navTabs"></div>
-
-    <div class="top">
-      <h1 id="title">Combining like terms</h1>
-      <div class="levels" id="levels"></div>
+  <div class="topbar">
+    <div class="head">
+      <h1 class="dtitle">Combine Like Terms 1</h1>
+      <span class="count" id="count">Problem 1 of 20</span>
+      <button class="tilink" id="tiLink" type="button" hidden>Turn in</button>
     </div>
+    <div class="grow"></div>
+    <button class="icon" id="tileBtn" title="Show or hide algebra tiles" aria-label="Algebra tiles" aria-pressed="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="3" width="10" height="10"/><rect x="15" y="3" width="4" height="10"/><rect x="3" y="15" width="4" height="4"/><rect x="9" y="15" width="4" height="4"/></svg>
+    </button>
+  </div>
 
-    <div class="progress">
-      <div class="pbar"><i id="pfill"></i></div>
-      <div class="pmeta" id="pmeta"></div>
-    </div>
-    <div class="mastery" id="mastery"></div>
-
-    <div class="main">
-      <div class="promptbar" id="promptbar"></div>
-
-      <div class="work">
-        <div class="stagebox" id="stagebox">
-          <div class="stage" id="stage">
-            <div class="eq" id="eq"></div>
-            <div id="panel"></div>
-          </div>
-        </div>
+  <div class="desk">
+    <div class="scroll">
+      <div class="work" id="work">
+        <div id="rows"></div>
+        <input id="key" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" inputmode="text" aria-label="Your answer">
       </div>
+    </div>
+    <div class="tiles" id="tiles" aria-hidden="true" hidden></div>
+    <div class="note" id="note" role="status"></div>
+    <button class="next" id="nextBtn">Next</button>
+  </div>
+
+<div class="turnin" id="turnin" role="dialog" aria-labelledby="ti-title" hidden>
+  <div class="ti-inner">
+    <h2 id="ti-title">All 20 done</h2>
+    <p class="ti-sub" id="ti-sub">Enter your period and name to turn in your work.</p>
+    <div class="ti-recap" id="ti-recap"></div>
+    <div id="ti-log"></div>
+
+    <iframe name="hidden_iframe" id="hidden_iframe" style="display:none"
+            onload="if(window.onHiddenFrameLoad)onHiddenFrameLoad()"></iframe>
+
+    <form action="https://docs.google.com/forms/d/e/1FAIpQLSe4_Gnrq1zyrttA3lSgrVBtMkaVaoMim31ByzoH-orxmfDB2A/formResponse"
+          method="POST" target="hidden_iframe" id="gform">
+      <div class="ti-warn">
+        Read the box labels before you type. Your <b>LAST name</b> goes in the
+        <b>Last name</b> box and your <b>FIRST name</b> goes in the <b>First name</b> box.
+        Swapped names cannot be matched to the roster and count as missing.
+      </div>
+      <div class="ti-field">
+        <label for="studentPeriod"><span class="ti-num">1</span>Period</label>
+        <input type="number" id="studentPeriod" placeholder="e.g. 3" min="1" max="10" required>
+      </div>
+      <div class="ti-field">
+        <label for="lastName"><span class="ti-num">2</span>LAST name
+          <em>&mdash; your family name, the one the roster is alphabetized by</em></label>
+        <input type="text" id="lastName" placeholder="Rodriguez" autocomplete="family-name" required>
+      </div>
+      <div class="ti-field">
+        <label for="firstName"><span class="ti-num">3</span>FIRST name
+          <em>&mdash; the name your teacher calls you by</em></label>
+        <input type="text" id="firstName" placeholder="Maria" autocomplete="given-name" required>
+      </div>
+      <div class="ti-check" id="nameCheck"></div>
+      <input type="hidden" id="studentName" name="entry.1899284808" value="">
+      <input type="hidden" id="formScore" name="entry.1974610095" value="">
+      <button type="submit" class="ti-btn" id="ti-submit">Submit Results</button>
+    </form>
+
+    <div class="ti-feedback" id="ti-feedback"></div>
+    <div class="ti-after">
+      <span>Want more practice?</span>
+      <button class="ti-ghost" type="button" id="ti-back">Keep practicing</button>
     </div>
   </div>
 </div>
 
-<!-- offscreen: a finished copy of the problem is drawn here and measured, so the
-     real one can be sized once and then left alone -->
-<div class="ghost" id="ghost" aria-hidden="true"></div>
-<div class="toast" id="toast" aria-live="polite"></div>
 <script>
-
-/* ============ shell: one score, tabs state, router ============ */
-const Shell = {
-  done:0, streak:0, active:null, activeEng:null,
-  mode:"mixed", engines:{}, timers:[], recent:[],
-  counts:{},
-
-  /* --- progression. Kept for the session only, so a fresh page is a fresh
-     start; nothing is written to the browser. --- */
-  xp:0, level:1, gained:0, bestStreak:0, bestTime:0, mastery:{},
-  toastQ:[], toastBusy:false, hudMode:null, runTimer:null,
-  RANKS:["Beginner","Sorter","Gatherer","Collector","Tidier","Simplifier",
-         "Adept","Sharp","Fluent","Slick","Master","Grandmaster"],
-  MASTER:5,
-
-  /* --- the run --- */
-  run:{on:false, over:false, t:0, score:0, combo:0, bestCombo:0, solved:0,
-       elapsed:0, pause:false, tier:0, kinds:{}},
-  runBest:{score:0, solved:0, combo:0},
-  START:55,
-  /* difficulty is not a setting, it is something that happens to you. The pool
-     only ever grows, so a run has a shape: easy, then busy, then frightening,
-     then over. Nobody chooses the hard tab; everybody reaches it. */
-  TIERS:[
-    {n:0,  pool:["simple","twovars"],          say:"Warm-up",                     sh:"Warm-up"},
-    {n:3,  pool:["powers","cancel"],           say:"Powers &amp; cancelling",     sh:"Powers"},
-    {n:6,  pool:["products","fractions"],      say:"xy terms &amp; fractions",    sh:"Fractions"},
-    {n:9,  pool:["brackets"],                  say:"Brackets",                    sh:"Brackets"},
-    {n:13, pool:["double","everything"],       say:"Two brackets &amp; everything", sh:"Everything"},
-    {n:17, pool:["distribute"],                say:"Distribute",                  sh:"Distribute"}
-  ],
-
-  title:"Combining like terms",
-  kinds:[
-    {id:"simple",    tab:"One Letter",   tally:"3x &hellip; 5x",  name:"One letter and loose numbers"},
-    {id:"twovars",   tab:"Two Letters",  tally:"a &hellip; b",    name:"Two different letters"},
-    {id:"powers",    tab:"Powers",       tally:"x<sup>2</sup> &hellip; x", name:"Squares and plain letters"},
-    {id:"products",  tab:"xy Terms",     tally:"xy &hellip; x",   name:"Two letters multiplied together"},
-    {id:"brackets",  tab:"Brackets",     tally:"k(x + a)",        name:"A bracket to multiply out"},
-    {id:"double",    tab:"Two Brackets", tally:"k(&middot;) &plusmn; m(&middot;)", name:"Two brackets to multiply out"},
-    {id:"distribute",tab:"Distribute",   tally:"2x(x &minus; 3)", name:"A term with a letter outside the bracket"},
-    {id:"fractions", tab:"Fractions",    tally:"&frac12;x &hellip; &frac13;x", name:"Fractions in front"},
-    {id:"cancel",    tab:"Cancelling",   tally:"5x &minus; 5x",   name:"A pair that comes to nothing"},
-    {id:"everything",tab:"Everything",   tally:"all at once",     name:"Several of these at once"}
-  ],
-  /* the harder kinds are given the shorter wording from the first problem: a
-     student who has chosen them is not the student who needs every step spelt
-     out. The full working is always one press of Hint away. */
-  hard:{products:1, double:1, distribute:1, fractions:1, cancel:1, everything:1},
-
-  kind:function(id){
-    const ks=Shell.kinds;
-    for(let i=0;i<ks.length;i++) if(ks[i].id===id) return ks[i];
-    return ks[0];
-  },
-
-  later:function(ms,fn){ Shell.timers.push(setTimeout(fn,ms)); },
-  clearTimers:function(){ Shell.timers.forEach(clearTimeout); Shell.timers=[]; },
-
-  /* One size per problem. The engine works the scale out from the finished
-     problem before the first line is drawn and holds it for every step, so the
-     writing never changes size while the student is working. */
-  scale:1,
-  applyScale:function(){
-    const stage=document.getElementById("stage");
-    if(!stage) return;
-    const box=stage.parentNode, s=Shell.scale;
-    if(s<0.999){
-      stage.style.transform="scale("+s+")";
-      box.style.height=Math.ceil(stage.offsetHeight*s)+"px";
-    } else {
-      stage.style.transform="none";
-      box.style.height="";
-    }
-  },
-  /* only the width is reported: the page scrolls, so there is no height budget
-     to fit the writing into */
-  room:function(){
-    const work=document.querySelector(".work");
-    return {w:work.clientWidth};
-  },
-  ghost:function(html){
-    const g=document.getElementById("ghost");
-    g.innerHTML=html;
-    const out=[].map.call(g.children,function(c){ return {w:c.offsetWidth, h:c.offsetHeight}; });
-    g.innerHTML="";
-    return out;
-  },
-  /* the size depends on width alone, so a change in height is ignored. Without
-     that guard the work area growing a line taller would ask for a refit, which
-     resizes the work area, which asks again */
-  watchFit:function(){
-    let queued=false, lastW=0;
-    const go=function(){
-      if(queued) return;
-      queued=true;
-      requestAnimationFrame(function(){
-        queued=false;
-        const work=document.querySelector(".work");
-        const w=work?work.clientWidth:0;
-        if(w===lastW) return;
-        lastW=w;
-        if(Shell.onResize) Shell.onResize();
-      });
-    };
-    window.addEventListener("resize",go);
-    if(window.ResizeObserver){
-      const ro=new ResizeObserver(go);
-      ro.observe(document.querySelector(".work"));
-    }
-  },
-
-  /* the scaffolding thins out once the student is clearly not needing it */
-  LEAN:3,
-  lean:function(){
-    return Shell.run.on || !!Shell.hard[Shell.active] || Shell.streak>=Shell.LEAN;
-  },
-
-  /* ---- rank and experience ----
-     The bar is short on purpose. A level that takes three or four problems keeps
-     the next reward inside the horizon of "one more", which is the only distance
-     that ever gets anyone to do a fifth problem. */
-  need:function(){ return 40 + Shell.level*25; },
-  rank:function(){ return Shell.RANKS[Math.min(Shell.level-1, Shell.RANKS.length-1)]; },
-  addXP:function(g){
-    Shell.gained=g; Shell.xp+=g;
-    while(Shell.xp >= Shell.need()){
-      Shell.xp -= Shell.need(); Shell.level++;
-      Shell.toast("Level "+Shell.level+" &middot; "+Shell.rank());
-    }
-  },
-  toast:function(msg){
-    Shell.toastQ.push(msg);
-    /* a backlog of congratulations is worse than none: the newest two win */
-    if(Shell.toastQ.length>2) Shell.toastQ=Shell.toastQ.slice(-2);
-    Shell.pumpToast();
-  },
-  pumpToast:function(){
-    if(Shell.toastBusy || !Shell.toastQ.length) return;
-    const el=document.getElementById("toast");
-    if(!el){ Shell.toastQ=[]; return; }
-    Shell.toastBusy=true;
-    el.innerHTML=Shell.toastQ.shift();
-    el.className="toast show";
-    /* deliberately outside Shell.timers: a toast is about the run, not about the
-       problem, and must survive the page moving on to the next one */
-    setTimeout(function(){
-      el.className="toast";
-      setTimeout(function(){ Shell.toastBusy=false; Shell.pumpToast(); },300);
-    },1500);
-  },
-
-  head:function(id){
-    const c=Shell.counts, st=Shell.streak;
-    document.getElementById("title").innerHTML = Shell.title;
-    /* during a run the HUD says everything worth saying, and a second row of
-       numbers next to a falling clock is just noise */
-    if(Shell.run.on){
-      document.getElementById("levels").innerHTML="";
-      Shell.paintProgress(); Shell.paintMastery();
-      return;
-    }
-    /* ten kinds is too many to list every time, so the breakdown is kept for
-       mixed practice, where knowing which kind you are short of is the point */
-    let tally="";
-    if(Shell.mode==="mixed"){
-      tally='<span class="tally">'
-        + Shell.kinds.filter(function(x){ return c[x.id]; }).map(function(x){
-            return '<span title="'+x.name+'">'+x.tally+' <b>'+c[x.id]+'</b></span>';
-          }).join("")
-        + '</span>';
-    }
-    const cls = st>=10 ? "flame blaze" : st>=5 ? "flame hot" : st>0 ? "flame on" : "flame";
-    const fire = st>=10 ? " &#128293;&#128293;" : st>=5 ? " &#128293;" : "";
-    document.getElementById("levels").innerHTML =
-      '<span class="score">'+Shell.done+' done</span>'
-      + '<span class="'+cls+'">'+(st ? st+' in a row'+fire : 'streak: 0')+'</span>'
-      + (Shell.bestStreak>1 ? '<span class="pb">best '+Shell.bestStreak
-         + (Shell.bestTime ? ' &middot; fastest '+Shell.bestTime+'s' : '')+'</span>' : "")
-      + (Shell.lean() ? '<span class="lean" title="Shorter wording &mdash; the full working is still under Hint">'
-                      + (Shell.hard[Shell.active]?'lean':'lean &middot; on a run')+'</span>' : "")
-      + tally;
-    Shell.paintProgress();
-    Shell.paintMastery();
-  },
-  /* the HUD is only rebuilt when it changes shape. Rewriting it ten times a
-     second would kill the bar's transition and blow away the floating +time */
-  paintProgress:function(){
-    const box=document.querySelector(".progress");
-    if(!box) return;
-    const want = Shell.run.on ? "run" : "xp";
-    if(Shell.hudMode!==want){
-      Shell.hudMode=want;
-      box.innerHTML = want==="run"
-        ? '<div class="runhud">'
-          + '<div class="clock" id="clock"><div class="clkrow"><span class="clktxt" id="clkTxt">0:45</span>'
-          + '<span class="clklbl">left</span></div><div class="clkbar"><i id="clkBar"></i></div></div>'
-          + '<div class="rstat"><b id="scoreVal">0</b><span>score</span></div>'
-          + '<div class="rstat combo" id="comboBox"><b id="comboVal">&times;1</b><span>combo</span></div>'
-          + '<div class="rstat"><b id="solvedVal">0</b><span>solved</span></div>'
-          + '<span class="tier" id="tierTag">Warm-up</span></div>'
-        : '<div class="pbar"><i id="pfill"></i></div><div class="pmeta" id="pmeta"></div>';
-    }
-    if(want==="run"){ Shell.paintClock(); Shell.paintRunStats(); return; }
-    const fill=document.getElementById("pfill");
-    if(fill) fill.style.width = Math.round(100*Shell.xp/Shell.need())+"%";
-    const meta=document.getElementById("pmeta");
-    if(meta) meta.innerHTML='<span class="rank">'+Shell.rank()+'</span>'
-      + '<span><b>'+Shell.xp+'</b> / '+Shell.need()+' xp</span>';
-  },
-  paintClock:function(){
-    const r=Shell.run, el=document.getElementById("clkTxt");
-    if(!el) return;
-    const s=Math.max(0,Math.ceil(r.t));
-    el.textContent = Math.floor(s/60)+":"+(s%60<10?"0":"")+(s%60);
-    const bar=document.getElementById("clkBar");
-    if(bar) bar.style.width = Math.max(0,Math.min(100,100*r.t/Shell.START))+"%";
-    const w=document.getElementById("clock");
-    if(w) w.className = "clock"+(r.t<=10?" low":"")+(r.t<=5?" crit":"");
-  },
-  paintRunStats:function(){
-    const r=Shell.run;
-    const sv=document.getElementById("scoreVal");
-    if(sv) sv.textContent=r.score.toLocaleString();
-    const cv=document.getElementById("comboVal");
-    if(cv) cv.innerHTML="&times;"+Shell.mult();
-    const cb=document.getElementById("comboBox");
-    if(cb) cb.className="rstat combo"+(Shell.mult()>=4?" hi":"");
-    const sd=document.getElementById("solvedVal");
-    if(sd) sd.textContent=r.solved;
-    const tt=document.getElementById("tierTag");
-    if(tt) tt.innerHTML=Shell.TIERS[Shell.tierAt(r.solved)].say;
-  },
-  bump:function(id){
-    const el=document.getElementById(id);
-    if(!el) return;
-    el.classList.remove("bump");
-    void el.offsetWidth;
-    el.classList.add("bump");
-  },
-
-  /* the multiplier is capped so that a long run is won by surviving rather than
-     by one untouchable streak, and so a slip costs a lot without costing all */
-  mult:function(){ return Math.min(6, 1+Math.floor(Shell.run.combo/2)); },
-  tierAt:function(n){
-    let i=0;
-    Shell.TIERS.forEach(function(t,j){ if(n>=t.n) i=j; });
-    return i;
-  },
-  runPool:function(){
-    let p=[];
-    Shell.TIERS.forEach(function(t){ if(Shell.run.solved>=t.n) p=p.concat(t.pool); });
-    return p;
-  },
-  startRun:function(){
-    clearInterval(Shell.runTimer);
-    Shell.clearTimers();
-    Shell.run={on:true, over:false, t:Shell.START, score:0, combo:0, bestCombo:0,
-               solved:0, elapsed:0, pause:false, tier:0, kinds:{}};
-    Shell.mode="run"; Shell.recent=[]; Shell.hudMode=null;
-    Shell.paintTabs();
-    Shell.runTimer=setInterval(Shell.tick,100);
-    Shell.next();
-  },
-  stopRun:function(){
-    clearInterval(Shell.runTimer); Shell.runTimer=null;
-    Shell.run.on=false; Shell.run.over=false; Shell.hudMode=null;
-  },
-  tick:function(){
-    const r=Shell.run;
-    if(!r.on || r.over || r.pause) return;
-    r.t-=0.1; r.elapsed+=0.1;
-    if(r.t<=0){ r.t=0; Shell.paintClock(); Shell.endRun(); return; }
-    Shell.paintClock();
-  },
-  addTime:function(sec){
-    const r=Shell.run;
-    if(!r.on || r.over) return;
-    /* time cannot be hoarded. A player who banked ninety seconds would have
-       bought their way out of the only thing making this interesting, so a
-       solve can fill the clock and never overfill it */
-    r.t = sec>0 ? Math.min(Shell.START, r.t+sec) : Math.max(0, r.t+sec);
-    Shell.paintClock();
-    const c=document.getElementById("clock");
-    if(!c) return;
-    const s=document.createElement("span");
-    s.className="tpop"+(sec<0?" bad":"");
-    s.textContent=(sec>0?"+":"")+Math.round(sec)+"s";
-    c.appendChild(s);
-    setTimeout(function(){ if(s.parentNode) s.parentNode.removeChild(s); },900);
-  },
-
-  /* what a solve is worth in a run. Time is bought back in proportion to how
-     much work the problem was, so a four-pile bracket problem is not a losing
-     trade — but nothing buys back more time than it took a fast solver, which
-     is why the clock always wins in the end */
-  runSolve:function(q,clean,secs){
-    const r=Shell.run;
-    if(!r.on || r.over) return {pts:0, time:0};
-    const before=Shell.tierAt(r.solved);
-    r.solved++;
-    if(Shell.active) r.kinds[Shell.active]=(r.kinds[Shell.active]||0)+1;
-    if(clean){ r.combo++; if(r.combo>r.bestCombo) r.bestCombo=r.combo; }
-    else r.combo=0;
-
-    const work = q.fams.length + (q.exp.length?1.5:0) + q.terms.length*0.25;
-    /* The time a solve buys back shrinks as the run goes on. Without this the
-       run has no ending: a strong player banks time faster than the clock takes
-       it and simply never dies, and a game you cannot lose is a treadmill. With
-       it, every run has the same shape — comfortable, then tight, then over —
-       and the only question is how far down that slope skill carries you. The
-       shrinking is visible in the +Ns that floats off the clock, so it is felt
-       before it is understood. */
-    const decay = Math.max(0.45, 1 - r.solved*0.016);
-    const time = Math.max(2, Math.round(Math.min(13, 4+work*1.6)*decay*(clean?1:0.7)));
-    /* score, unlike time, grows with depth: surviving late is the achievement */
-    let pts = Math.round((40+work*22)*Shell.mult()*(1+r.solved*0.02)/10)*10;
-    if(clean && secs<=Math.round(work*2.2)) pts+=Math.round(pts*0.25/10)*10;  /* quick */
-    r.score+=pts;
-
-    Shell.addTime(time);
-    Shell.paintRunStats(); Shell.bump("scoreVal");
-    if(clean && r.combo>1) Shell.bump("comboVal");
-    const after=Shell.tierAt(r.solved);
-    if(after>before) Shell.toast(Shell.TIERS[after].say+" &mdash; unlocked");
-    return {pts:pts, time:time};
-  },
-  runMiss:function(){
-    const r=Shell.run;
-    if(!r.on || r.over) return;
-    r.combo=0; Shell.paintRunStats();
-    Shell.addTime(-3);
-  },
-  runSkip:function(){
-    const r=Shell.run;
-    if(!r.on || r.over) return;
-    r.combo=0; Shell.paintRunStats();
-    Shell.addTime(-8);
-  },
-
-  endRun:function(){
-    Shell.clearTimers();
-    clearInterval(Shell.runTimer); Shell.runTimer=null;
-    const r=Shell.run;
-    r.over=true; r.pause=true;
-    Shell.activeEng=null;
-    const prev=Shell.runBest, isBest = r.score>prev.score;
-    if(isBest) Shell.runBest={score:r.score, solved:r.solved, combo:r.bestCombo};
-
-    Shell.scale=1; Shell.applyScale();
-    const el=document.getElementById("eq");
-    const pn=document.getElementById("panel");
-    if(pn) pn.innerHTML="";
-    const mins=Math.floor(r.elapsed/60), secs=Math.round(r.elapsed%60);
-    const kinds=Shell.kinds.filter(function(k){ return r.kinds[k.id]; })
-      .map(function(k){ return k.tab+" &times;"+r.kinds[k.id]; }).join(" &nbsp;&middot;&nbsp; ");
-    if(el) el.innerHTML =
-      '<div class="over"><div class="ovs">'+r.score.toLocaleString()+'</div>'
-      + '<div class="ovl">points</div>'
-      + '<div class="ovrow">'
-      +   '<div class="ovcell"><b>'+r.solved+'</b><span>solved</span></div>'
-      +   '<div class="ovcell"><b>&times;'+Math.min(6,1+Math.floor(r.bestCombo/2))+'</b><span>best combo</span></div>'
-      +   '<div class="ovcell"><b>'+mins+':'+(secs<10?"0":"")+secs+'</b><span>survived</span></div>'
-      +   '<div class="ovcell"><b>'+Shell.TIERS[Shell.tierAt(r.solved)].sh+'</b><span>reached</span></div>'
-      + '</div>'
-      + '<div class="ovbest'+(isBest?"":" miss")+'">'
-      +   (isBest ? (prev.score ? "New best &mdash; beat "+prev.score.toLocaleString() : "First run on the board")
-                  : (prev.score-r.score)+" short of your best ("+prev.score.toLocaleString()+")")
-      + '</div>'
-      + (kinds?'<div class="ovkinds">'+kinds+'</div>':'')
-      + '</div>';
-
-    const pb=document.getElementById("promptbar");
-    if(pb){
-      pb.innerHTML='<div class="prompt"><div class="tagline"><span class="tag">Time</span></div>'
-        + '<span>'+(isBest?'Best run yet.':'The clock ran out.')
-        + ' Every solve buys time back &mdash; the faster you clear a line, the longer you last.</span>'
-        + '<button class="go" id="goBtn">Go again</button>'
-        + '<span class="kbd">or press Enter</span></div>'
-        + '<div class="skipwrap"><button class="link" id="practiceBtn">Back to practice</button></div>';
-      const g=document.getElementById("goBtn");
-      if(g) g.onclick=Shell.startRun;
-      const pr=document.getElementById("practiceBtn");
-      if(pr) pr.onclick=function(){ Shell.stopRun(); Shell.setTab("mixed",true); };
-    }
-    Shell.paintProgress();
-  },
-  /* five clean solves masters a kind. A mistake takes one dot back, so mastery
-     has to be held rather than merely reached */
-  paintMastery:function(){
-    const el=document.getElementById("mastery");
-    if(!el) return;
-    if(Shell.mode!=="mixed" || Shell.run.on){ el.innerHTML=""; return; }
-    el.innerHTML = Shell.kinds.map(function(k){
-      const m=Shell.mastery[k.id]||0;
-      let pips="";
-      for(let i=0;i<Shell.MASTER;i++) pips+='<span class="pip'+(i<m?" on":"")+'"></span>';
-      return '<span class="mrow'+(m>=Shell.MASTER?" mastered":"")+'" title="'+k.name+'">'
-           + k.tab+' '+pips+'</span>';
-    }).join("");
-  },
-
-  solved:function(clean, perfect, secs){
-    Shell.done++;
-    Shell.streak = clean ? Shell.streak+1 : 0;
-    const id=Shell.active;
-    if(id) Shell.counts[id]=(Shell.counts[id]||0)+1;
-
-    if(id){
-      const was=Shell.mastery[id]||0;
-      const now=clean ? Math.min(Shell.MASTER, was+1) : Math.max(0, was-1);
-      Shell.mastery[id]=now;
-      if(now===Shell.MASTER && was<Shell.MASTER)
-        Shell.toast("Mastered: "+Shell.kind(id).name);
-    }
-
-    /* a milestone only, and only once. Congratulating every single correct
-       answer is how a reward stops being one */
-    const st=Shell.streak, newBest = st>0 && st>Shell.bestStreak;
-    if(newBest) Shell.bestStreak=st;
-    if(!Shell.run.on && (st===3 || st===5 || st===10 || (st>10 && st%5===0)))
-      Shell.toast((newBest && st>3 ? "New best &middot; " : "")+st+" in a row &#128293;");
-
-    let fast=false;
-    if(clean && secs && (!Shell.bestTime || secs<Shell.bestTime)){
-      if(Shell.bestTime) fast=true;
-      Shell.bestTime=secs;
-      if(fast) Shell.toast("Fastest yet: "+secs+"s");
-    }
-
-    /* what a solve is worth: the bulk of it for finishing, a real slice for
-       finishing without a slip, and a bonus that grows with the run — so a
-       streak is worth protecting rather than just worth counting */
-    let g = 10;
-    if(clean)   g += 6;
-    if(perfect) g += 4;
-    g += Math.min(12, Shell.streak*2);
-    if(fast)    g += 6;
-    Shell.addXP(g);
-    return {gain:g, fast:fast};
-  },
-
-  /* don't let one kind of problem come up three times running */
-  pickKind:function(){
-    let pool;
-    if(Shell.run.on) pool=Shell.runPool();
-    else if(Shell.mode !== "mixed") return Shell.mode;
-    else pool=Shell.kinds.map(function(k){return k.id;});
-    if(Shell.recent.length>1 && Shell.recent[0]===Shell.recent[1]){
-      const thin=pool.filter(function(k){return k!==Shell.recent[0];});
-      if(thin.length) pool=thin;
-    }
-    const k=pool[Math.floor(Math.random()*pool.length)];
-    Shell.recent.unshift(k); Shell.recent=Shell.recent.slice(0,2);
-    return k;
-  },
-
-  next:function(){
-    Shell.clearTimers();
-    document.getElementById("panel").innerHTML="";
-    const id=Shell.pickKind();
-    Shell.active=id; Shell.activeEng="like";
-    Shell.engines["like"].start(id);
-  },
-
-  paintTabs:function(){
-    /* Run leads, then Mixed. Practising one kind at a time teaches the move;
-       mixed practice teaches choosing the move; the run teaches doing it under
-       the only condition anyone is ever actually assessed under */
-    document.getElementById("navTabs").innerHTML =
-      '<button class="tab-btn runtab'+(Shell.mode==="run"?" active":"")+'" data-mode="run">&#9889; Run</button>'
-      + '<button class="tab-btn'+(Shell.mode==="mixed"?" active":"")+'" data-mode="mixed">Mixed</button>'
-      + Shell.kinds.map(function(k){
-        return '<button class="tab-btn'+(Shell.mode===k.id?" active":"")
-             + '" data-mode="'+k.id+'">'+k.tab+'</button>';
-      }).join("");
-    document.querySelectorAll("#navTabs .tab-btn").forEach(function(btn){
-      btn.onclick = function(){ Shell.setTab(btn.getAttribute("data-mode")); };
-    });
-  },
-  setTab:function(mode,force){
-    if(mode==="run"){ Shell.startRun(); return; }
-    if(Shell.mode === mode && !force) return;
-    if(Shell.run.on) Shell.stopRun();
-    Shell.mode = mode; Shell.recent=[];
-    Shell.paintTabs();
-    Shell.next();
-  }
-};
-
-/* one key restarts a run, which is the whole difference between "that was fun"
-   and another five minutes of algebra */
-document.addEventListener("keydown",function(e){
-  if(!Shell.run.on || !Shell.run.over) return;
-  if(e.key==="Enter" || e.key===" "){ e.preventDefault(); Shell.startRun(); }
-});
-
-Shell.paintTabs();
-Shell.watchFit();
-
-/* ================= combining like terms =================
-   One move, repeated: pick a term, pick everything like it, add them up.
-   Nothing about the order is the page's to decide. A bracket adds a step at
-   the front; the check at the end puts a number in for the letters twice over,
-   because combining like terms changes how an expression is written and never
-   what it is worth.                                                        */
-Shell.engines["like"] = (function(){
-const KEY="like";
-
 /* ============ formatting ============ */
 const MINUS="\u2212", TIMES="\u00d7";
 function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
@@ -911,8 +339,8 @@ function rTxt(a){ return a.d===1 ? dash(String(a.n)) : dash(String(a.n))+"/"+a.d
 function rHTML(a){
   if(a.d===1) return dash(String(a.n));
   const sign = a.n<0 ? MINUS : "";
-  return sign+'<span class="dfrac"><span class="t">'+Math.abs(a.n)
-       + '</span><span class="bar"></span><span class="b">'+a.d+'</span></span>';
+  return sign+'<span class="dfrac"><span class="nu">'+Math.abs(a.n)
+       + '</span><span class="fbar"></span><span class="de">'+a.d+'</span></span>';
 }
 
 /* ============ terms ============
@@ -1125,7 +553,8 @@ function assemble(groups,opt){
   if(rNegQ(terms[0].c) && Math.random()<0.62) return null;
   const fams=buildFamilies(terms);
   if(fams.length<2 || fams.length>4) return null;
-  if(fams.some(function(f){ return f.idx.length<2; })) return null;
+  const lone=fams.filter(function(f){ return f.idx.length<2; }).length;
+  if(lone>(opt.lone?1:0)) return null;
   if(!enoughMinuses(terms,fams)) return null;
   const zeros=fams.filter(function(f){ return rZero(f.sum); }).length;
   if(opt.zeros===undefined){ if(zeros) return null; }
@@ -1500,722 +929,977 @@ function genEverything(){
   return q;
 }
 
-const GEN={simple:genSimple, twovars:genTwoVars, powers:genPowers, products:genProducts,
-           brackets:genBrackets, double:genDouble, distribute:genDistribute,
-           fractions:genFractions, cancel:genCancel, everything:genEverything};
-
-function genProblem(fl){
-  const f=GEN[fl]||genSimple;
-  for(let i=0;i<900;i++){ const q=f(); if(q) return finish(q); }
-  /* 7x + 3 - 2x + 5, in case a run of draws all fall foul of the checks above */
-  const terms=[Ti(7,[V("x",1)]),Ti(3,[]),Ti(-2,[V("x",1)]),Ti(5,[])];
-  return finish({terms:terms, fams:buildFamilies(terms), vals:{x:3}});
-}
-function finish(q){
-  if(!q.disp) q.disp=q.terms.slice();
-  if(!q.exp) q.exp=[];
-  q.steps=[];
-  if(q.exp.length) q.steps.push("expand");
-  q.steps.push("work","done");
-  /* the substitution check is the slowest and most valuable thing on the page,
-     which is exactly why it belongs in practice and not in a run */
-  if(!Shell.run.on) q.steps.push("check");
+/* --- small, tile-sized problems: squares, letters and loose numbers ---
+   Kept small enough to lay out as algebra tiles, with a matched pair often
+   thrown in so there is something to see vanish. A loose number may stand
+   alone, as it does in -2x^2 + 2x^2 + 4x - 3x - 5. */
+function genTiles(){
+  const ltr=pick(VARS);
+  const shapes=Math.random()<0.7 ? [[V(ltr,2)],[V(ltr,1)],[]] : [[V(ltr,1)],[]];
+  const zeroAt=Math.random()<0.5 ? rint(0,shapes.length-1) : -1;
+  const groups=shapes.map(function(vs,i){
+    const top=vs.length ? (vs[0].p>1?3:5) : 6;
+    if(i===zeroAt){ const a=rint(1,top); return [Ti(a,vs),Ti(-a,vs)]; }
+    if(!vs.length && Math.random()<0.4) return [Ti(rint(1,top)*sgn(0.6),vs)];
+    return [Ti(rint(1,top)*sgn(0.45),vs), Ti(rint(1,top)*sgn(0.5),vs)];
+  });
+  const q=assemble(groups, zeroAt>=0 ? {zeros:1, lone:true} : {lone:true});
+  if(!q) return null;
+  q.vals={}; q.vals[ltr]=rint(2,3);
   return q;
 }
 
-/* ============ state ============
-   Groups are made by the student, not by the page: the first term clicked opens
-   a group, and its family decides what else may join. They are kept in the order
-   they were picked, and that order is the order the answer is written in — which
-   is honest, because addition does not care. */
-const S={
-  p:null, fl:"simple", si:0, phase:"work",
-  tag:[], groups:[], cur:-1, expIn:[], ansIn:"", gone:{}, zap:-1,
-  miss:"", note:"", hint:false, clean:true, firstId:null, shakeI:-1,
-  ordered:false, reordered:false, usedHint:false,
-  t0:0, secs:0, perfect:false, gain:0, fast:false, pts:0, timeAdd:0
-};
-const clearTimers=Shell.clearTimers, later=Shell.later;
+const GEN={tiles:genTiles, simple:genSimple, twovars:genTwoVars, powers:genPowers, products:genProducts,
+           brackets:genBrackets, double:genDouble, distribute:genDistribute,
+           fractions:genFractions, cancel:genCancel, everything:genEverything};
 
-function idxOf(ph){ return S.p.steps.indexOf(ph); }
-function at(ph){ const i=idxOf(ph); return i>=0 && S.si>=i; }
-function lean(){ return Shell.lean(); }
 
-/* ---- the groups the student has made ---- */
-function famIndexOf(i){
-  const k=famKey(S.p.terms[i]);
-  for(let f=0;f<S.p.fams.length;f++) if(S.p.fams[f].k===k) return f;
+/* ================= app ================= */
+/* Combine Like Terms 1: gathering only, never a bracket to multiply out */
+const KINDS=["tiles","simple","twovars","powers","products","fractions","cancel"];
+const $=function(id){ return document.getElementById(id); };
+
+function newProblem(kind){
+  const f=GEN[kind]||genSimple;
+  for(let i=0;i<900;i++){
+    const q=f();
+    if(q){ if(!q.disp) q.disp=q.terms.slice(); if(!q.exp) q.exp=[]; return q; }
+  }
+  const terms=[Ti(7,[V("x",1)]),Ti(3,[]),Ti(-2,[V("x",1)]),Ti(5,[])];
+  return {terms:terms, fams:buildFamilies(terms), disp:terms.slice(), exp:[]};
+}
+
+/* ---------- writing terms ---------- */
+function varsH(vs){
+  return vs.map(function(x){ return "<i>"+x.v+"</i>"+(x.p>1?"<sup>"+x.p+"</sup>":""); }).join("");
+}
+function bodyH(t){
+  const a=rAbs(t.c);
+  if(!t.vs.length) return rHTML(a);
+  if(rOne(a)) return varsH(t.vs);
+  return rHTML(a)+varsH(t.vs);
+}
+function signOf(t,first){ return rNegQ(t.c) ? MINUS : (first ? "" : "+"); }
+function termH(t,first,cls,id){
+  const s=signOf(t,first);
+  const pk=cls && /\b(pick|chosen)\b/.test(cls);
+  return '<span class="t'+(first?" first":"")+(cls?" "+cls:"")+'"'+(id?' id="'+id+'"':"")
+       + (pk?' role="button" tabindex="0"':"")+'>'
+       + (s?'<span class="op">'+s+'</span>':"")+bodyH(t)+'</span>';
+}
+
+/* ---------- state ---------- */
+const S={kind:"mixed", last:null, q:null, steps:[], si:0, phase:"dist",
+         typed:{}, used:{}, ans:[], famOf:[], miss:0, hint:false, fresh:-1};
+
+function start(){
+  let k=S.kind;
+  if(k==="mixed"){
+    const pool=KINDS.filter(function(x){ return x!==S.last; });
+    k=pool[Math.floor(Math.random()*pool.length)];
+  }
+  S.last=k;
+  const q=newProblem(k);
+  S.q=q; S.steps=[]; S.si=0; S.typed={}; S.used={}; S.ans=[];
+  S.miss=0; S.hint=false; S.fresh=-1; S.wrong=false; S.flub=false; S.cur=-1; S.picked={}; S.carried=false;
+  let j=0;
+  q.disp.forEach(function(d,di){
+    if(d.br){
+      const pr=brTerms(d.br);
+      S.steps.push({di:di, part:0, j:j,   target:pr[0]});
+      S.steps.push({di:di, part:1, j:j+1, target:pr[1]});
+      j+=2;
+    } else j++;
+  });
+  S.famOf=q.terms.map(function(t){
+    const k=famKey(t);
+    for(let f=0;f<q.fams.length;f++) if(q.fams[f].k===k) return f;
+    return -1;
+  });
+  S.phase = S.steps.length ? "dist" : "comb";
+  buildTiles();
+  plusNote(false);
+  setBuf("");
+  $("nextBtn").classList.remove("show");
+  if(typeof setCount==="function") setCount();
+  render();
+  focusKey();
+}
+
+/* ---------- drawing the page ---------- */
+function termCls(j){
+  const f=S.famOf[j];
+  if(S.rowGone && S.rowGone[j]) return "gone";
+  if(S.used[f]) return rZero(S.q.fams[f].sum) ? "gone" : "c"+(f%4)+" used";
+  if(S.picked[j]) return "c"+(f%4)+" chosen";
+  let c = S.phase==="comb" ? "pick" : "";
+  if(S.hint && S.phase==="comb" && f===hintFam()) c+=" h"+(f%4);
+  return c;
+}
+function ready(){
+  return S.cur>=0 && S.q.fams[S.cur].idx.every(function(i){ return S.picked[i]; });
+}
+function hintFam(){
+  if(S.cur>=0) return S.cur;
+  const fs=S.q.fams;
+  for(let f=0;f<fs.length;f++) if(!S.used[f] && !rZero(fs[f].sum)) return f;
+  for(let f=0;f<fs.length;f++) if(!S.used[f]) return f;
   return -1;
 }
-function taggedAt(i){ return S.tag[i]!==null && S.tag[i]!==undefined; }
-function grpFam(g){ return S.p.fams[S.groups[g].fi]; }
-function groupFull(g){
-  if(g<0 || !S.groups[g]) return false;
-  return grpFam(g).idx.every(function(i){ return S.tag[i]===g; });
-}
-function awaiting(){ return S.cur>=0 && groupFull(S.cur); }
-/* a group whose terms come to nothing is not asked for a total. There is no
-   term to write, so writing one would be a fiction; the pair simply goes */
-function cancels(g){ return g>=0 && !!S.groups[g] && rZero(grpFam(g).sum); }
-function picked(g){ return grpFam(g).idx.filter(function(i){ return S.tag[i]===g; }); }
-function ungrouped(){
-  return S.tag.filter(function(t){ return t===null || t===undefined; }).length;
-}
-function allDone(){
-  return ungrouped()===0 && S.groups.every(function(g){ return g.done; });
-}
-function curTerm(){ return S.cur<0 ? null : grpFam(S.cur).term; }
-/* a group that came to nothing writes nothing, so it takes no place in the
-   answer and the group after it is still the one that needs no sign */
-function ansIndex(g){
-  let n=0;
-  for(let i=0;i<g;i++){
-    if(S.groups[i].done && !rZero(S.p.fams[S.groups[i].fi].term.c)) n++;
-  }
-  return n;
-}
-function sumOK(){ return S.cur>=0 && termAt(S.ansIn, curTerm(), ansIndex(S.cur)); }
-function answerTerms(){
-  const list=S.groups.filter(function(g){ return g.done; })
-    .map(function(g){ return S.p.fams[g.fi].term; })
-    .filter(function(t){ return !rZero(t.c); });
-  return S.ordered ? stdSort(list) : list;
-}
 
-/* ============ small rendering pieces ============ */
-function boxHTML(id,val,extra){
-  return '<input id="'+id+'" class="box'+(extra||"")+'" value="'+esc(val)
-       + '" autocomplete="off" spellcheck="false" inputmode="text">';
-}
-function chip(inner,cls,attrs){
-  return '<span class="tm'+(cls?" "+cls:"")+'"'+(attrs||"")+'>'+inner+'</span>';
-}
-function brChip(br,first){
-  const o = br.s<0 ? MINUS : (first?"":"+");
-  return chip(
-    (o?'<span class="op">'+o+'</span>':"")
-    + '<span class="brk">'+bodyStr(brMult(br))
-    + '<span class="paren">(</span>'
-    + termStr(brInner(br),true)+termStr(brNum(br),false)
-    + '<span class="paren">)</span></span>', "");
-}
-
-/* the line as it is first written, brackets and all */
-function dispLine(cls){
-  const parts=S.p.disp.map(function(d,i){
-    return d.br ? brChip(d.br,i===0) : chip(termStr(d,i===0),"");
-  });
-  return '<div class="line '+(cls||"")+'">'+parts.join("")+'</div>';
-}
-
-/* the working line: every term written out flat, coloured as it is claimed. A
-   term already used up by a finished group is faded, so what is left to pick is
-   always the part of the line still in full ink */
-/* which terms are still on the line: a cancelled group leaves it altogether,
-   and the ones after it shuffle up, so the first term standing is written the
-   way a first term is written */
-function onLine(){
-  return S.p.terms.map(function(t,i){ return i; }).filter(function(i){
-    const g=S.tag[i];
-    return !(g!==null && g!==undefined && S.gone[g]);
-  });
-}
-function flatLine(opts){
-  const p=S.p, o=opts||{};
-  const parts=onLine().map(function(i,pos){
-    const t=p.terms[i], bx=p.exp.indexOf(i);
-    if(o.boxes && bx>=0){
-      const ok=termAt(S.expIn[bx], t, i===0?0:1);
-      return boxHTML("e"+bx, S.expIn[bx]||"", " term"+(ok?" ok":""));
+function problemRow(){
+  const q=S.q, flat=!q.exp.length, step=S.phase==="dist"?S.steps[S.si]:null;
+  let j=0;
+  const parts=q.disp.map(function(d,di){
+    const first=di===0;
+    if(!d.br){
+      const h=termH(d,first, flat?termCls(j):"", flat?"f"+j:"o"+j);
+      j++; return h;
     }
-    const g=S.tag[i], has=taggedAt(i);
-    const used = has && S.groups[g] && S.groups[g].done;
-    const live = o.pick && !has;
-    let cls="";
-    if(has) cls="t"+(g%4)+" grow"+(used?" dim":"");
-    if(has && g===S.zap) cls+=" zap";
-    if(live) cls+=" pick";
-    if(i===S.shakeI) cls+=" shake";
-    if(o.fresh && bx>=0) cls+=" grow";
-    const attrs = live ? ' data-i="'+i+'" role="button" tabindex="0"' : "";
-    return chip(termStr(t,pos===0),cls,attrs);
+    const br=d.br, on=step && step.di===di;
+    const neg=br.s<0;
+    let h="";
+    if(!neg && !first) h+='<span class="op">+</span>';
+    h+='<span class="t'+(on?" on":"")+'" id="m'+di+'">'
+      + (neg?'<span class="op" style="margin-left:'+(first?0:".28em")+';margin-right:.06em">'+MINUS+'</span>':"")
+      + bodyH(brMult(br))+'</span>';
+    h+='<span class="paren">(</span>';
+    h+=termH(brInner(br),true, on&&step.part===0?"on":"", "i"+di+"a");
+    h+=termH(brNum(br),false, on&&step.part===1?"on":"", "i"+di+"b");
+    h+='<span class="paren">)</span>';
+    j+=2;
+    return '<span style="display:inline-flex;align-items:baseline">'+h+'</span>';
   });
-  return '<div class="line'+(o.quiet?" quiet":"")+'">'+parts.join("")+'</div>';
+  return '<div class="row p" id="prow"><span class="gut"></span><span class="txt">'+parts.join("")+'</span>'
+       + '<svg class="arrows" id="arrows"><defs>'
+       + '<marker id="hNow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M1 1L9 5L1 9" fill="none" stroke="var(--pen)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></marker>'
+       + '<marker id="hWas" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M1 1L9 5L1 9" fill="none" stroke="var(--faint)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></marker>'
+       + '</defs></svg></div>';
 }
 
-/* the group in hand, gathered onto its own line in the order it was picked. The
-   box turns up only once every term of that family has been collected, which is
-   how the page says "that is all of them" without counting them out */
-function workLine(){
-  if(S.cur<0) return "";
-  const g=S.cur, list=picked(g);
-  if(!list.length) return "";
-  const zap = g===S.zap;
-  const inner=list.map(function(ti,j){
-    return chip(termStr(S.p.terms[ti], j===0), "t"+(g%4)+" grow"+(zap?" zap":""));
+function writer(ghost){
+  return '<span class="mir" id="mir"></span>'+(ghost?'<span class="ghost" id="ghost"></span>':"");
+}
+
+function expandedRow(){
+  const q=S.q, step=S.phase==="dist"?S.steps[S.si]:null;
+  const parts=[];
+  let shown=0;
+  q.terms.forEach(function(t,j){
+    const isExp=q.exp.indexOf(j)>=0;
+    if(step && step.j===j){ parts.push(writer(true)); shown++; return; }
+    if(isExp && S.typed[j]===undefined) return;
+    /* loose terms come down after the distributing; until then they hold
+       their place, unseen, so every product is written where it belongs */
+    const hold=!isExp && S.phase==="dist";
+    const cls=(S.phase!=="dist"?termCls(j):"")+(S.fresh===j?" pop":"")+(hold?" hold":"");
+    parts.push(termH(t, j===0, cls, hold?"":"f"+j));
+    shown++;
+  });
+  return '<div class="row w"><span class="gut">=</span><span class="txt">'+parts.join("")+'</span></div>';
+}
+
+function answerRow(){
+  const q=S.q;
+  let list=S.ans.slice();
+  if(S.phase==="done"){
+    list.sort(function(a,b){
+      const s=stdSort([q.fams[a].term,q.fams[b].term]);
+      return s[0]===q.fams[a].term ? -1 : 1;
+    });
+  }
+  let h=list.map(function(f,i){
+    return termH(q.fams[f].term, i===0, "c"+(f%4)+(f===S.fresh?" pop":""));
   }).join("");
-  let h='<div class="line work">'+inner;
-  if(groupFull(g)){
-    if(cancels(g)){
-      h+='<span class="eqs">=</span>'+chip("0","t"+(g%4)+(zap?" zap":""));
-    } else {
-      h+='<span class="eqs">=</span>'
-       + boxHTML("sum", S.ansIn, " term"+(sumOK()?" ok":" g"+(g%4)));
-    }
-  } else {
-    h+='<span class="waiting">&hellip; any more?</span>';
-  }
-  return h+'</div>';
-}
-
-/* the answer, built one group at a time as each total is written. A group that
-   came to nothing never reaches it — the student watched that pair go */
-function answerLine(){
-  const ans=answerTerms();
-  if(!ans.length) return "";
-  const cls = (S.reordered && S.phase==="done") ? "slide" : "";
-  return '<div class="line answer">'
-    + ans.map(function(t,i){ return chip(termStr(t,i===0),cls); }).join("")
-    + '</div>';
-}
-
-function buildRows(){
-  const p=S.p, rows=[], live=(S.phase==="work"), pk=live && !awaiting() && S.zap<0;
-  if(p.exp.length){
-    rows.push(dispLine(at("work")?"quiet":""));
-    if(at("expand")) rows.push(flatLine({boxes:S.phase==="expand", pick:pk,
-                                         fresh:S.phase==="expand"}));
-  } else {
-    rows.push(flatLine({pick:pk}));
-  }
-  if(live){ const w=workLine(); if(w) rows.push(w); }
-  const a=answerLine(); if(a) rows.push(a);
-  return rows;
-}
-function renderEquation(){
-  document.getElementById("eq").innerHTML = buildRows().join("");
-}
-
-/* ============ the check ============
-   A number goes in for each letter on both lines. They come to the same total,
-   because gathering like terms rewrites an expression without changing what it
-   is worth — which is the only reason the move is allowed at all. */
-function subTerm(t,first){
-  const o=opStr(t,first), a=rAbs(t.c);
-  let body;
-  if(!t.vs.length) body=rHTML(a);
-  else {
-    const vals=t.vs.map(function(x){
-      return '<span class="val">('+S.p.vals[x.v]+')</span>'+(x.p>1?"<sup>"+x.p+"</sup>":"");
-    }).join("");
-    body=(rOne(a)?"":rHTML(a))+vals;
-  }
-  return (o?o+" ":"")+body+" ";
-}
-function evalTerms(list){
-  let acc=R(0);
-  list.forEach(function(t){
-    let v=R(1);
-    t.vs.forEach(function(x){ v=rMul(v, R(Math.pow(S.p.vals[x.v], x.p))); });
-    acc=rAdd(acc, rMul(t.c, v));
-  });
-  return acc;
-}
-function checkHTML(){
-  const p=S.p;
-  const a=p.terms.map(function(t,i){ return subTerm(t,i===0); }).join("");
-  const ans=answerTerms();
-  const b=ans.length ? ans.map(function(t,i){ return subTerm(t,i===0); }).join("") : "0 ";
-  const v=rHTML(evalTerms(p.terms));
-  return '<div class="checkline"><div class="orig">'+a+'= '+v+'</div>'
-       + '<div class="sub">'+b+'= '+v+' <span class="green">&#10003;</span></div></div>';
-}
-function renderPanel(){
-  const el=document.getElementById("panel");
-  el.innerHTML = S.phase==="check" ? checkHTML() : "";
-}
-
-/* ============ the prompt ============ */
-function pill(txt){ return '<div class="tagline"><span class="tag">'+txt+'</span></div>'; }
-function M(s){ return '<span class="math">'+s+'</span>'; }
-/* the numbers in front of one family, written as the sum they are. Not the
-   terms: writing 7 + 5w + 3w = 15 would be doing the very thing being unpicked */
-function coefSum(f){
-  return f.idx.map(function(i,j){
-    const c=S.p.terms[i].c;
-    return j ? ((rNegQ(c)?MINUS:"+")+" "+rTxt(rAbs(c))) : rTxt(c);
-  }).join(" ");
-}
-function likeRule(){
-  return 'Terms are alike when they carry exactly the same letters, each to exactly the same '
-       + 'power &mdash; or no letters at all. The number in front can be anything.';
-}
-function fracHint(f){
-  const ds=[]; f.idx.forEach(function(i){ const d=S.p.terms[i].c.d; if(d>1 && ds.indexOf(d)<0) ds.push(d); });
-  if(!ds.length) return "";
-  let L=1; ds.forEach(function(d){ L=lcm(L,d); });
-  return 'Put them over a common bottom of '+L+' and add the tops: ';
-}
-
-/* what the solve was worth, said plainly and immediately. The xp lands in the
-   same breath as the answer, which is the whole reason it works at all */
-function badges(){
-  const b=[];
-  if(Shell.run.on){
-    b.push('<span class="badge xp">+'+S.pts+' pts</span>');
-    b.push('<span class="badge good">+'+S.timeAdd+'s</span>');
-    if(Shell.run.combo>1) b.push('<span class="badge">&times;'+Shell.mult()+' combo</span>');
-    else if(!S.clean) b.push('<span class="badge">combo lost</span>');
-    return '<div class="badges">'+b.join("")+'</div>';
-  }
-  if(S.perfect)      b.push('<span class="badge good">Perfect &mdash; no slips, no hint</span>');
-  else if(S.clean)   b.push('<span class="badge good">Clean solve</span>');
-  b.push('<span class="badge time'+(S.fast?' good':'')+'">'+S.secs+'s'+(S.fast?' &mdash; fastest yet':'')+'</span>');
-  if(Shell.streak>=2) b.push('<span class="badge">'+Shell.streak+' in a row</span>');
-  if(S.gain)         b.push('<span class="badge xp">+'+S.gain+' xp</span>');
-  return '<div class="badges">'+b.join("")+'</div>';
-}
-
-function renderPrompt(){
-  const el=document.getElementById("promptbar"), p=S.p;
-  const hintBtn='<button class="link" id="hintBtn">'+(S.hint?"Hide hint":"Hint")+'</button>';
-  const ph=S.phase;
-  let h="";
-
-  if(ph==="expand"){
-    const many=p.exp.length>2;
-    /* when the thing outside carries a letter, calling it "the number outside"
-       would be the one word a student needs not to hear */
-    const carries=p.disp.some(function(d){ return d.br && d.br.mv && d.br.mv.length; });
-    h='<div class="prompt">'+pill(many?"Multiply out both brackets":"Multiply out the bracket")
-      + '<span>'+(lean()
-          ? 'Multiply through, sign and all.'
-          : (carries
-              ? 'What sits outside multiplies <strong>both</strong> terms inside &mdash; the letters '
-                + 'as well as the numbers, so the powers add'
-              : 'The number outside multiplies <strong>both</strong> terms inside')
-            + (many?', and that goes for each bracket in turn':'')
-            + '. Write each result in full, sign and all.')+'</span>'+hintBtn;
-    if(S.hint){
-      const bits=[];
-      p.disp.forEach(function(d){
-        if(!d.br) return;
-        const br=d.br, t=brTerms(br);
-        /* the multiplier is quoted with the sign it is actually being applied
-           with, so the hint is true of a subtracted bracket too */
-        const ms=(br.s<0?MINUS:"")+bodyStr(brMult(br));
-        bits.push(M(ms+" "+TIMES+" "+plainTerm(brInner(br)))+" gives "+M(plainTerm(t[0]))
-                + ", and "+M(ms+" "+TIMES+" "+plainTerm(brNum(br)))+" gives "+M(plainTerm(t[1])));
-      });
-      const neg=p.disp.some(function(d){ return d.br && d.br.s<0; });
-      h+='<div class="hintline">'+bits.join("; ")+'. '
-        + (neg?'A bracket that is being taken away hands its minus to <strong>both</strong> terms inside &mdash; every sign in there flips. ':'')
-        + (carries?'A letter times the same letter is that letter squared.':'')
-        + '</div>';
-    }
-    h+='</div>';
-  }
-  else if(ph==="work" && S.zap>=0){
-    const f=grpFam(S.zap);
-    h='<div class="prompt">'+pill("They cancel")
-      + '<span>'+M(coefSum(f))+' = '+M("0")
-      + (f.vs.length ? ', so there is no '+M(vsHTML(f.vs))+' left to write down' : '')
-      + '. Off they go.</span></div>';
-  }
-  else if(ph==="work" && awaiting()){
-    const f=grpFam(S.cur), t=curTerm(), n=ansIndex(S.cur);
-    h='<div class="prompt">'+pill("Add them up")
-      + '<span>'+(lean()
-          ? 'Add the numbers in front, keeping every sign.'
-          : (f.vs.length
-              ? 'The letters match, so they line up and drop out. Add the numbers in front '
-                + '&mdash; '+M(coefSum(f))+' &mdash; then put '+M(vsHTML(f.vs))+' back on the end.'
-              : 'Add them: '+M(coefSum(f))+'.'))
-        + (n && !lean() ? ' It follows a term, so write its + or '+MINUS+' too.' : '')+'</span>'
-      + hintBtn;
-    if(S.hint){
-      const lead=fracHint(f);
-      h+='<div class="hintline">'+lead+M(coefSum(f))+' = '+M(rTxt(f.sum))
-        + (rZero(f.sum)
-            ? ', and none of '+M(vsHTML(f.vs)||"those numbers")+' is left at all. Write '+M("0")+'.'
-            : (f.vs.length ? ', so this group comes to '+M(signedBody(t))+'.' : '.'))
-        + (rZero(f.sum) ? ''
-           : (n ? ' Type it as '+M((rNegQ(t.c)?MINUS:"+")+bodyStr(t))+' &mdash; the sign is part of what goes in the box.'
-                : ' Type the whole term into the box.'))+'</div>';
-    }
-    h+='</div>';
-  }
-  else if(ph==="work" && S.cur>=0){
-    const anchor=S.p.terms[picked(S.cur)[0]];
-    h='<div class="prompt">'+pill("Gather like terms")
-      + '<span>'+(lean()
-          ? 'Anything else like '+M(bodyStr(anchor))+'?'
-          : 'Keep going &mdash; every other term like '+M(bodyStr(anchor))
-            + ' belongs in this group. The box turns up once you have them all.')+'</span>'+hintBtn;
-    if(S.hint) h+='<div class="hintline">'+likeRule()+'</div>';
-    h+='</div>';
-  }
-  else if(ph==="work"){
-    const left=ungrouped();
-    h='<div class="prompt">'+pill("Gather like terms")
-      + '<span>'+(lean()
-          ? 'Pick a term, then all its like terms.'
-          : 'Click any term, then every other term that is like it. '
-            + 'The groups can be taken in whatever order you like.')+'</span>'
-      + '<span class="count">'+left+' term'+(left===1?"":"s")+' still to group</span>'+hintBtn;
-    if(S.hint) h+='<div class="hintline">'+likeRule()+'</div>';
-    h+='</div>';
-  }
-  else if(ph==="done"){
-    const n=answerTerms().length;
-    h='<div class="prompt">'+pill(S.reordered?"Standard form":"Simplified")
-      + '<span>'+(S.reordered
-          ? 'Same answer, written the usual way round: highest power first, then the plain '
-            + 'letters, then the loose number.'
-          : (n ? p.terms.length+' terms became '+n+(n===1?' term':' terms')
-                 + (n>1 ? ', already in standard form' : '')
-               : 'Every group cancelled: the whole thing comes to nothing'))
-        + '.</span>'+badges()+'</div>';
-  }
-  else if(ph==="check"){
-    const v=p.vals, names=Object.keys(v).sort();
-    const sub=names.map(function(n){ return n+" = "+v[n]; });
-    h='<div class="prompt">'+pill("Check")
-      + '<span>Put '+M(listWords(sub))+' into both lines and they come to the same number. '
-      + 'Combining like terms changes how it is written, never what it is worth.</span>'
-      + '<button class="next" id="nextBtn">Next</button></div>';
-  }
-
-  if(S.miss) h+='<div class="missline">'+S.miss+'</div>';
-  else if(S.note) h+='<div class="noteline">'+S.note+'</div>';
-  if(ph!=="check" && ph!=="done")
-    h+='<div class="skipwrap"><button class="link" id="skipBtn">Skip'
-     + (Shell.run.on?' &minus;8s':'')+'</button></div>';
-  el.innerHTML=h;
+  if(S.phase==="comb") h+=writer(true);
+  if(S.phase==="done") h+='<span class="tick" aria-label="Correct">&#10003;</span>';
+  return '<div class="row w"><span class="gut">=</span><span class="txt">'+h+'</span></div>';
 }
 
 function render(){
-  Shell.head(Shell.active); renderEquation(); renderPanel(); renderPrompt(); attach();
-  Shell.applyScale(); focusFirst();
+  let h=problemRow();
+  if(S.q.exp.length) h+=expandedRow();
+  if(S.phase!=="dist") h+=answerRow();
+  $("rows").innerHTML=h;
+  paintMirror();
+  drawArrows(true);
+  updateTiles(false);
 }
-function focusFirst(){
-  later(60,function(){
-    const el=S.firstId && document.getElementById(S.firstId);
-    if(el) el.focus();
+
+/* ---------- arrows: from what is outside the bracket to what it multiplies ---------- */
+function drawArrows(animate){
+  const svg=$("arrows"), row=$("prow");
+  if(!svg || !row) return;
+  svg.querySelectorAll("path.a").forEach(function(p){ p.remove(); });
+  const base=row.getBoundingClientRect();
+  if(S.phase==="comb") drawCarry(svg,base,animate);
+  if(S.phase!=="dist") return;
+  const em=parseFloat(getComputedStyle(row).fontSize);
+  S.steps.forEach(function(st,i){
+    if(i>S.si) return;
+    const m=$("m"+st.di), t=$("i"+st.di+(st.part?"b":"a"));
+    if(!m||!t) return;
+    const a=m.getBoundingClientRect(), b=t.getBoundingClientRect();
+    const x1=a.left+a.width*0.62-base.left, x2=b.left+b.width*0.55-base.left;
+    const y1=a.top-base.top+em*0.12, y2=b.top-base.top+em*0.1;
+    const lift=Math.min(em*1.55, em*0.55+Math.abs(x2-x1)*0.32);
+    const top=Math.min(y1,y2)-lift;
+    const d="M"+x1+" "+y1+" C"+x1+" "+top+" "+x2+" "+top+" "+x2+" "+y2;
+    const p=document.createElementNS("http://www.w3.org/2000/svg","path");
+    p.setAttribute("d",d);
+    const now=i===S.si;
+    p.setAttribute("class","a "+(now?"now":"was"));
+    p.setAttribute("marker-end", now?"url(#hNow)":"url(#hWas)");
+    svg.appendChild(p);
+    if(now && animate){
+      const L=p.getTotalLength();
+      p.style.strokeDasharray=L; p.style.strokeDashoffset=L;
+      p.classList.add("draw");
+    }
   });
 }
 
-/* ============ flow ============ */
-function setPhase(ph){
-  clearTimers();
-  const i=idxOf(ph);
-  if(i<0) return;
-  S.si=i; S.phase=ph; S.miss=""; S.shakeI=-1;
-  S.firstId = ph==="expand" ? firstEmptyExpand() : null;
-  render();
-  if(ph!=="done") return;
-  /* the answer is shown in the order it was gathered, held there long enough to
-     be recognised as the student's own, and only then tidied — so the move to
-     standard form reads as a second, separate thing rather than as the page
-     quietly disagreeing with how the work was done. In a run the same beat is
-     played at a third of the length, and the clock is stopped while it plays:
-     the tidying is the page's business, so the page pays for it. */
-  const fast=Shell.run.on;
-  const done=function(){
-    if(Shell.run.on){ Shell.run.pause=false; nextProblem(); }
-    else setPhase("check");
-  };
-  if(!isStd(answerTerms())){
-    later(fast?300:1150,function(){
-      S.ordered=true; S.reordered=true; render();
-      later(fast?620:2100, done);
-    });
-  } else {
-    S.ordered=true;
-    later(fast?520:1150, done);
-  }
-}
-function advance(){ setPhase(S.p.steps[S.si+1]); }
-function finishProblem(){
-  S.secs=Math.max(1,Math.round((Date.now()-S.t0)/1000));
-  S.perfect = S.clean && !S.usedHint;
-  const r=Shell.solved(S.clean, S.perfect, S.secs);
-  S.gain=r.gain; S.fast=r.fast;
-  if(Shell.run.on){
-    Shell.run.pause=true;                       /* the clock waits out the flourish */
-    const rr=Shell.runSolve(S.p, S.clean, S.secs);
-    S.pts=rr.pts; S.timeAdd=rr.time;
-  }
-  S.ordered=false; S.reordered=false;
-  setPhase("done");
-}
-function flagMiss(msg){
-  if(!msg) return;
-  /* one charge per mistake, not one per press of Enter on the same wrong answer */
-  if(!S.miss) Shell.runMiss();
-  S.clean=false; S.miss=msg; renderPrompt(); attach();
-  later(4200,function(){ S.miss=""; renderPrompt(); attach(); });
-}
-function signNote(t){
-  const ex=plainTerm(T(rAbs(t.c),t.vs));
-  return "That is the right size \u2014 but it is not the first thing on that line, so it needs its "
-    + "sign in front: write +"+ex+" rather than "+ex+", or the term before it runs straight into it.";
-}
-
-/* ============ picking the groups ============ */
-function clickTerm(i){
-  if(S.phase!=="work" || taggedAt(i) || awaiting() || S.zap>=0) return;
-  const fi=famIndexOf(i);
-  S.note="";
-  if(S.cur<0){
-    /* the first term clicked opens a group and sets what may join it */
-    S.groups.push({fi:fi, done:false});
-    S.cur=S.groups.length-1; S.ansIn=""; S.miss="";
-  } else if(S.groups[S.cur].fi!==fi){
-    S.clean=false; S.shakeI=i;
-    renderEquation(); attach();
-    later(360,function(){ S.shakeI=-1; renderEquation(); attach(); });
-    flagMiss(unlikeMsg(S.p.terms[i], S.p.terms[picked(S.cur)[0]]));
-    return;
-  }
-  S.tag[i]=S.cur;
-  if(groupFull(S.cur) && cancels(S.cur)){ vanish(S.cur); return; }
-  S.firstId = groupFull(S.cur) ? "sum" : null;
-  render();
-}
-/* the pair is shown struck through against a 0 for a moment, and then it is
-   off the line entirely. No box: there is no term to write down */
-function vanish(g){
-  S.zap=g; S.firstId=null;
-  render();
-  later(1250,function(){
-    const f=grpFam(g);
-    S.zap=-1; S.groups[g].done=true; S.gone[g]=true;
-    S.note = f.vs.length
-      ? "Those came to 0"+vsTxt(f.vs)+" \u2014 no "+vsTxt(f.vs)+" at all, so they are gone."
-      : "Those numbers came to 0, so they are gone.";
-    S.cur=-1; S.ansIn=""; S.miss="";
-    if(allDone()) finishProblem(); else render();
+/* once the brackets are multiplied out, the loose terms are carried straight
+   down, and an arrow shows where each one came from */
+function drawCarry(svg,base,animate){
+  const q=S.q;
+  if(!q.exp.length) return;
+  const fresh=!S.carried; S.carried=true;
+  if(S.ans.length || Object.keys(S.picked).length || buf || S.q.fams.some(function(x,i){ return S.used[i]; })) return;
+  const quiet=false;
+  q.terms.forEach(function(t,j){
+    if(q.exp.indexOf(j)>=0) return;
+    const o=$("o"+j), f=$("f"+j);
+    if(!o||!f) return;
+    const a=o.getBoundingClientRect(), b=f.getBoundingClientRect();
+    const x1=a.left+a.width/2-base.left, y1=a.bottom-base.top-a.height*0.08;
+    const x2=b.left+b.width/2-base.left, y2=b.top-base.top+b.height*0.12;
+    const dy=(y2-y1)*0.5;
+    const p=document.createElementNS("http://www.w3.org/2000/svg","path");
+    p.setAttribute("d","M"+x1+" "+y1+" C"+x1+" "+(y1+dy)+" "+x2+" "+(y2-dy)+" "+x2+" "+y2);
+    p.setAttribute("class","a "+(quiet?"was":"now"));
+    p.setAttribute("marker-end", quiet?"url(#hWas)":"url(#hNow)");
+    svg.appendChild(p);
+    if(fresh && animate){
+      const L=p.getTotalLength();
+      p.style.strokeDasharray=L; p.style.strokeDashoffset=L;
+      p.classList.add("draw");
+    }
   });
 }
-/* the reason two terms are not alike is the lesson, so the nudge names it
-   rather than saying no */
-function unlikeMsg(got,want){
-  const g=M(signedBody(got)), w=M(signedBody(want));
-  if(!got.vs.length && want.vs.length) return g+" has no letter with it, so it cannot join "+w
-    + ". A loose number can only ever be added to another loose number.";
-  if(got.vs.length && !want.vs.length) return g+" carries "+(got.vs.length>1?"letters":"a letter")
-    + ", and "+w+" does not. Adding them would mean claiming to know what "+M(vsHTML(got.vs))
-    + " is worth, and nothing here says.";
-  if(letters(got.vs)!==letters(want.vs)) return g+" and "+w+" are not built from the same letters "
-    + "&mdash; "+M(vsHTML(got.vs))+" against "+M(vsHTML(want.vs))+". A term has to carry exactly the "
-    + "same letters before it can join another, and there is no telling what "
-    + M(vsHTML(got.vs))+" is worth next to "+M(vsHTML(want.vs))+".";
-  return g+" and "+w+" are the same letters raised to different powers. "+M(vsHTML(want.vs))
-    + " and "+M(vsHTML(got.vs))+" are as different as a length and an area \u2014 only exactly "
-    + "matching powers can be gathered.";
+
+/* ---------- what the student types ---------- */
+let buf="";
+function setBuf(v){ buf=v; const k=$("key"); k.value=v; try{ k.setSelectionRange(v.length,v.length); }catch(e){} }
+
+function fmt(s){
+  let out="", i=0;
+  while(i<s.length){
+    const c=s[i];
+    if(/[a-z]/.test(c)){
+      out+="<i>"+c+"</i>"; i++;
+      let m=s.slice(i).match(/^\^?(\d+)/);
+      if(m){ out+="<sup>"+m[1]+"</sup>"; i+=m[0].length; }
+      else if(s[i]==="^"){ out+='<sup class="pend">^</sup>'; i++; }
+      continue;
+    }
+    if(c==="-"||c==="+"){
+      out+='<span class="op"'+(i===0?' style="margin-left:'+(firstSlot()?"0":".28em")+'"':"")+'>'+(c==="-"?MINUS:"+")+'</span>'; i++; continue;
+    }
+    if(c==="^"){ out+='<sup class="pend">^</sup>'; i++; continue; }
+    if(c==="*"){ out+="&middot;"; i++; continue; }
+    out+=esc(c); i++;
+  }
+  return out;
+}
+function firstSlot(){
+  if(S.phase==="comb") return S.ans.length===0;
+  if(S.phase==="dist"){
+    const j=S.steps[S.si].j;
+    return j===0;
+  }
+  return false;
+}
+function paintMirror(){
+  const m=$("mir");
+  if(!m) return;
+  const k=$("key");
+  const pos=(k.selectionStart==null)?buf.length:k.selectionStart;
+  m.classList.toggle("bad",!!S.wrong);
+  const gg=goal();
+  m.classList.toggle("gap", !!gg && !gg.first && !/^[+\-]/.test(buf));
+  m.innerHTML=fmt(buf.slice(0,pos))+'<span class="caret"></span>'+fmt(buf.slice(pos));
+  const g=$("ghost");
+  if(g){
+    let tg=null, first=false;
+    if(S.phase==="dist"){ const st=S.steps[S.si]; tg=st.target; first=st.j===0; }
+    else if(S.phase==="comb" && ready()){ tg=S.q.fams[S.cur].term; first=!S.ans.length; }
+    g.innerHTML = (S.hint && tg && !buf) ? termH(tg, first) : "";
+  }
+}
+function shake(){
+  const m=$("mir");
+  if(!m) return;
+  m.classList.remove("shake"); void m.offsetWidth; m.classList.add("shake");
+  setTimeout(function(){ m.classList.remove("shake"); },380);
 }
 
-/* ============ inputs ============ */
-function firstEmptyExpand(){
-  for(let j=0;j<S.p.exp.length;j++){
-    const i=S.p.exp[j];
-    if(!termAt(S.expIn[j], S.p.terms[i], i===0?0:1)) return "e"+j;
+/* the same term written the ways people write it, used only to tell whether
+   what has been typed so far could still be the start of something longer */
+function cands(t){
+  const a=rAbs(t.c), v=t.vs.map(function(x){ return x.v+(x.p>1?x.p:""); }).join("");
+  const s=rNegQ(t.c)?"-":"";
+  const out=[];
+  if(a.d===1){ out.push(s+a.n+v); if(a.n===1 && v) out.push(s+v); }
+  else { out.push(s+a.n+"/"+a.d+v); out.push(s+a.n+v+"/"+a.d); }
+  return out;
+}
+function norm(s){ return s.toLowerCase().replace(/[\s^]/g,"").replace(/[\u2212\u2013\u2014]/g,"-").replace(/^\+/,""); }
+
+function miss(raw){
+  S.miss++; S.wrong=true; S.flub=true;
+  S.plusNote=false;
+  note(hintFor(raw));
+  shake();
+}
+
+function acceptDist(){
+  plusNote(false);
+  const st=S.steps[S.si];
+  S.typed[st.j]=st.target;
+  S.fresh=st.j;
+  S.si++; S.miss=0; S.hint=false; S.wrong=false;
+  setBuf("");
+  if(S.si>=S.steps.length) S.phase="comb";
+  render();
+}
+function acceptFam(f){
+  plusNote(false);
+  /* a group the student worked by clicking has already shown its tiles; a
+     group they simply typed the answer to keeps its tiles back until the
+     end, when the whole board is laid out and combined in one go */
+  if(S.viaClick) S.viaClick[f] = f===S.cur || S.q.fams[f].idx.some(function(j){
+    return S.picked[j] || (S.locked && S.locked[j]);
+  });
+  S.used[f]=true;
+  if(!rZero(S.q.fams[f].sum)){ S.ans.push(f); S.fresh=f; }
+  S.miss=0; S.hint=false; S.wrong=false;
+  if(f===S.cur){ S.cur=-1; S.picked={}; }
+  setBuf("");
+  /* a pair of opposites is never cleared away for a student who is working
+     by clicking: it waits to be clicked like any other group, so the
+     cancelling is something they do. A student who has typed every answer
+     without clicking anything already knows the pair comes to nothing, so the
+     problem finishes and the pair is shown cancelling in the end replay */
+  const typing=!S.q.fams.some(function(x,i){ return S.viaClick[i]; })
+            && !Object.keys(S.picked).length;
+  let left=S.q.fams.some(function(x,i){ return !S.used[i] && !(typing && rZero(x.sum)); });
+  if(!left){
+    S.q.fams.forEach(function(x,i){ if(!S.used[i]){ S.used[i]=true; S.viaClick[i]=false; } });
+    S.phase="done"; S.fresh=-1; const rp=replayMs(); S.doneAt=Date.now()+rp+(S.tiles&&tilesOn?600:0); S.tileTimers.g=[setTimeout(gatherAll,rp)];
+    finishProblem();
   }
+  render();
+  if(left && !S.q.fams.some(function(x,i){ return !S.used[i] && !rZero(x.sum); }))
+    note("Some terms are left. Click them to see what happens.");
+}
+
+/* ---------- what to try next, after a wrong answer ----------
+   Says what to do, never what the answer is. */
+function M(h){ return '<span class="m">'+h+'</span>'; }
+function numsTxt(list){
+  return list.map(function(c,i){
+    if(!i) return rTxt(c);
+    return (rNegQ(c)?" "+MINUS+" ":" + ")+rTxt(rAbs(c));
+  }).join("");
+}
+function hintFor(raw){
+  const t=parseTerm(raw);
+  if(!t) return "Type one term, like "+M("3<i>x</i>")+" or "+M(MINUS+"5");
+  const q=S.q;
+  if(S.phase==="dist"){
+    const st=S.steps[S.si], br=q.disp[st.di].br;
+    const mul=T(R(br.s*br.k),(br.mv||[]).slice());
+    const inn=st.part ? brNum(br) : brInner(br);
+    const g=st.target;
+    const sameV=vsKey(t.vs)===vsKey(g.vs), sameN=rEq(rAbs(t.c),rAbs(g.c));
+    if(sameV && sameN){
+      const a=rNegQ(mul.c), b=rNegQ(inn.c);
+      return "Check the sign: "+(a?"negative":"positive")+" &times; "+(b?"negative":"positive")
+           + " = "+(a!==b?"negative":"positive");
+    }
+    if(sameN && !sameV && mul.vs.length)
+      return "Multiply the letters: "+M(varsH(mul.vs)+" &times; "+(inn.vs.length?varsH(inn.vs):"(no letter)"))
+           + (inn.vs.length && mul.vs[0].v===inn.vs[0].v ? " &mdash; add the exponents" : "");
+    if(sameV && !sameN)
+      return "Multiply the numbers: "+M(rTxt(mul.c)+" &times; "+(rNegQ(inn.c)?"("+rTxt(inn.c)+")":rTxt(inn.c)));
+    return "Multiply "+M(termH(mul,true))+" by "+M(termH(inn,true));
+  }
+  const k=vsKey(t.vs);
+  const name=t.vs.length ? M(varsH(t.vs))+" terms" : "plain numbers";
+  let f=-1;
+  q.fams.forEach(function(x,i){ if(x.k===k) f=i; });
+  if(f<0) return "There are no "+name+". Like terms have the same letters and exponents.";
+  if(S.used[f]) return "You already combined the "+name+".";
+  const fam=q.fams[f];
+  const sum=M(numsTxt(fam.idx.map(function(i){ return q.terms[i].c; })));
+  const signOnly=rEq(rAbs(t.c),rAbs(fam.sum)) && !rZero(fam.sum);
+  return (signOnly?"Check the sign. ":"")
+       + (t.vs.length ? "Add the numbers in front of the "+name+": " : "Add the plain numbers: ")+sum;
+}
+
+/* the term being written right now, and whether it opens its line */
+function goal(){
+  if(S.phase==="dist"){ const st=S.steps[S.si]; return {t:st.target, first:st.j===0}; }
+  if(S.phase==="comb" && ready()) return {t:S.q.fams[S.cur].term, first:!S.ans.length};
   return null;
 }
-function expandDone(){ return firstEmptyExpand()===null; }
-
-function attach(){
-  const hb=document.getElementById("hintBtn");
-  if(hb) hb.onclick=function(){
-    S.hint=!S.hint;
-    if(S.hint) S.usedHint=true;   /* a hint still counts as clean, just not perfect */
-    renderPrompt(); attach();
-  };
-  const sb=document.getElementById("skipBtn");
-  if(sb) sb.onclick=function(){ Shell.runSkip(); nextProblem(); };
-  const nb=document.getElementById("nextBtn"); if(nb) nb.onclick=nextProblem;
-
-  document.querySelectorAll("#eq .tm.pick").forEach(function(el){
-    const i=+el.getAttribute("data-i");
-    el.onclick=function(){ clickTerm(i); };
-    el.onkeydown=function(e){
-      if(e.key==="Enter"||e.key===" "){ e.preventDefault(); clickTerm(i); }
-    };
-  });
-  for(let j=0;j<S.p.exp.length;j++) bind("e"+j,onExpand);
-  bind("sum",onSum);
+/* a positive term after the first one needs its + written in */
+function plusMissing(raw,g){
+  return !g.first && !rNegQ(g.t.c) && !hasSign(raw);
 }
-function bind(id,handler){
-  const el=document.getElementById(id);
-  if(!el) return;
-  el.oninput=handler;
-  el.onkeydown=function(e){ if(e.key==="Enter"){ e.preventDefault(); flagMiss(missMessage()); } };
+function note(html){
+  const n=$("note");
+  if(!n) return;
+  if(html) n.innerHTML=html;
+  n.classList.toggle("show",!!html);
 }
-function setCls(el,cls){ if(el && el.className!==cls) el.className=cls; }
-function focusId(id){ const el=document.getElementById(id); if(el) el.focus(); }
-
-function onExpand(e){
-  const j=+e.target.id.slice(1), p=S.p, i=p.exp[j];
-  S.expIn[j]=e.target.value;
-  const ok=termAt(S.expIn[j], p.terms[i], i===0?0:1);
-  setCls(e.target,"box term"+(ok?" ok":""));
-  clearTimers();
-  if(expandDone()){ later(460,function(){ S.hint=false; advance(); }); return; }
-  if(ok){ const nx=firstEmptyExpand(); if(nx) focusId(nx); }
+function plusNote(on){
+  S.plusNote=!!on;
+  note(on ? 'Add the <b>+</b> sign' : "");
 }
-function onSum(e){
-  if(S.cur<0) return;
-  S.ansIn=e.target.value;
-  const ok=sumOK();
-  setCls(e.target,"box term"+(ok?" ok":" g"+(S.cur%4)));
-  clearTimers();
-  if(!ok) return;
-  later(520,function(){
-    S.hint=false;
-    const f=grpFam(S.cur);
-    S.groups[S.cur].done=true;
-    /* a group that came to nothing is worth a word: the 0 is not an answer of
-       zero, it is the whole family leaving */
-    S.note = rZero(f.sum)
-      ? (f.vs.length
-          ? "That group came to 0"+vsTxt(f.vs)+" \u2014 no "+vsTxt(f.vs)
-            + " at all, so none of it is left in the answer."
-          : "Those numbers came to 0, so nothing of them is left in the answer.")
-      : "";
-    S.cur=-1; S.ansIn=""; S.miss=""; S.firstId=null;
-    if(allDone()) finishProblem(); else render();
-  });
-}
-
-/* ============ what went wrong ============ */
-function missMessage(){
-  const p=S.p, ph=S.phase;
-  if(ph==="expand"){
-    /* Enter pressed on an answer that is already right, in the moment before
-       the page moves on, is not a mistake and must not cost the streak */
-    const id0=firstEmptyExpand();
-    if(!id0) return "";
-    const j=+id0.slice(1), i=p.exp[j], want=p.terms[i];
-    /* the wrappers have to be unwrapped: p.disp holds {br:...}, not the bracket */
-    const br=p.disp.filter(function(d){ return d.br; })
-                   .map(function(d){ return d.br; })[Math.floor(j/2)];
-    const out=br ? bodyStr(brMult(br)) : "the multiplier";
-    if(signGap(S.expIn[j],want,1)) return signNote(want);
-    const q=parseTerm(S.expIn[j]);
-    if(q && rEq(q.c,rNeg(want.c))) return "The size is right and the sign is not. That bracket is "
-      + (br && br.s<0 ? "being taken away, so every sign inside it flips"
-                      : "added, so the signs inside it stay as they are")+".";
-    /* the number came out right but the letters did not: the classic slip when
-       what is outside the bracket carries a letter of its own */
-    if(q && rEq(q.c,want.c) && vsKey(q.vs)!==vsKey(want.vs))
-      return "The number in front is right; the letters are not. "+M(out)+" multiplies the letters "
-        + "as well, so this comes out as "+M(signedBody(want))+".";
-    if(br && j%2===1 && q && rEq(rAbs(q.c),R(br.b))) return "That is the number inside the bracket, "
-      + "untouched. The "+M(out)+" outside multiplies it too \u2014 both terms, not just the first.";
-    return "Multiply "+M(out)+" by each term inside in turn, and write the result with its sign.";
+/* 1 = right, -1 = right but the + is missing, 0 = not it.
+   In combining, any group not yet written counts, picked or not. */
+function famFor(t){
+  const fs=S.q.fams;
+  if(S.cur>=0 && !S.used[S.cur] && sameTerm(t,fs[S.cur].term)) return S.cur;
+  for(let f=0;f<fs.length;f++){
+    if(S.used[f]) continue;
+    if(rZero(fs[f].sum) ? rZero(t.c) : sameTerm(t,fs[f].term)) return f;
   }
-  if(ph==="work" && awaiting()){
-    const f=grpFam(S.cur), want=curTerm(), q=parseTerm(S.ansIn), n=ansIndex(S.cur);
-    if(sumOK()) return "";
-    if(signGap(S.ansIn,want,n)) return signNote(want);
-    if(!q) return "Write the whole term: the number, then the letters if the group has any.";
-    if(rZero(want.c)) return "Those cancel out. Add them and see: "+M(coefSum(f))+" = "+M("0")+".";
-    if(rEq(q.c,want.c) && vsKey(q.vs)!==vsKey(want.vs)){
-      if(!q.vs.length) return "The number is right, but the letters have to come with it \u2014 write "
-        + M(signedBody(want))+", not "+M(rTxt(q.c))+".";
-      return "The number is right; the letters or their powers are not. This group gathers "+famName(want)+".";
+  return -1;
+}
+/* a fraction typed as 2/4 or 6x/8 has the right value but is not finished:
+   the student is asked to simplify it rather than having it done for them.
+   Not counted as a wrong answer — the arithmetic was right. */
+function unreduced(raw){
+  const s=String(raw).replace(/\s+/g,"").replace(/[()]/g,"");
+  if(s.indexOf("/")<0) return null;
+  const num=+((s.match(/^[+\-\u2212\u2013\u2014]?(\d*)/)||[])[1]||"1");
+  const den=+((s.split("/")[1].match(/^(\d+)/)||[])[1]||"0");
+  if(!den) return null;
+  if(den===1 || gcd(num,den)>1) return {n:num, d:den};
+  return null;
+}
+function simplifyNote(u){
+  S.plusNote=false;
+  note(u.d===1 || u.n%u.d===0
+    ? "Write "+M(u.n+"/"+u.d)+" as a whole number."
+    : "Simplify "+M(u.n+"/"+u.d)+" \u2014 the top and bottom can both be divided by "+gcd(u.n,u.d)+".");
+}
+function hit(raw){
+  const t=parseTerm(raw);
+  if(!t) return 0;
+  if(S.phase==="dist"){
+    const g=goal();
+    if(!sameTerm(t,g.t)) return 0;
+    const u=unreduced(raw);
+    if(u){ simplifyNote(u); return -1; }
+    if(plusMissing(raw,g)){ plusNote(true); return -1; }
+    return 1;
+  }
+  if(S.phase!=="comb") return 0;
+  const f=famFor(t);
+  if(f<0) return 0;
+  S.hitFam=f;
+  const u=unreduced(raw);
+  if(u){ simplifyNote(u); return -1; }
+  if(!rZero(t.c) && plusMissing(raw,{t:S.q.fams[f].term, first:!S.ans.length})){ plusNote(true); return -1; }
+  return 1;
+}
+function take(){ if(S.phase==="dist") acceptDist(); else acceptFam(S.hitFam); }
+/* in combining, 3 could be on its way to 3x, so wait if it could be longer */
+function couldGrow(){
+  const nb=norm(buf);
+  /* a bare number might be the top of a fraction still being typed (2 on its
+     way to 2/8x), so while a fraction answer is still to come it waits for
+     Enter, a space or the next sign */
+  if(/^-?\d+$/.test(nb) && S.q.fams.some(function(x,f){ return !S.used[f] && x.sum.d>1; })) return true;
+  return S.q.fams.some(function(x,f){
+    if(S.used[f] || rZero(x.sum)) return false;
+    return cands(x.term).some(function(c){ c=norm(c); return c!==nb && c.indexOf(nb)===0; });
+  });
+}
+
+/* try to hand in what has been typed. quiet = don't count a miss */
+function commit(str,quiet){
+  const s=str.trim();
+  if(!s || s==="+" || s==="-") return false;
+  const h=hit(s);
+  if(h===1){ take(); return true; }
+  if(h===-1){ const m=$("mir"); if(m){ m.classList.remove("shake"); void m.offsetWidth; m.classList.add("shake"); } return false; }
+  if(!quiet) miss(s);
+  return false;
+}
+
+/* accept as soon as the term is right, unless it could still be the start
+   of a different answer (3 on the way to 3x) */
+function autoAccept(){
+  if(!buf) return;
+  if(S.phase==="comb" && couldGrow()) return;
+  if(hit(buf)===1) take();
+}
+
+const key=$("key");
+key.addEventListener("input",function(){
+  if(S.phase==="done"){ setBuf(""); paintMirror(); return; }
+  let v=key.value.toLowerCase().replace(/[\u2212\u2013\u2014]/g,"-");
+  if(S.plusNote && v===buf+"+"){ v="+"+buf; S.wrong=false; }
+  /* after a wrong answer, the next key starts fresh instead of adding on */
+  if(S.wrong){
+    S.wrong=false;
+    if(v.length>buf.length && v.indexOf(buf)===0) v=v.slice(buf.length);
+  }
+  const spaced=/\s/.test(v);
+  v=v.replace(/\s/g,"");
+  /* a sign after a term means that term is finished and the next has begun */
+  const k=v.slice(1).search(/[+\-]/);
+  if(k>=0){
+    const cut=k+1, before=v.slice(0,cut), after=v.slice(cut);
+    if(before.slice(-1)!=="^" && before.slice(-1)!=="/"){
+      if(commit(before)){ setBuf(after); paintMirror(); return; }
+      setBuf(before); paintMirror(); return;
     }
-    if(rEq(q.c,rNeg(want.c))) return "The right size, the wrong way round. Add the numbers in front as "
-      + "they stand: "+M(coefSum(f))+" = "+M(rTxt(want.c))+".";
-    let all=R(0);
-    p.terms.forEach(function(t){ all=rAdd(all,t.c); });
-    if(rEq(q.c,all)) return "That is every number on the line added together, including ones from other "
-      + "groups. Only terms that are alike can be added.";
-    if(q.c.d===1 && want.c.d>1) return "The answer is not a whole number. "+M(coefSum(f))
-      + " needs the fractions put over a common bottom before the tops are added.";
-    return "Add the numbers in front of that group, keeping each sign as it stands.";
   }
-  return "";
-}
-
-/* ============ sizing ============ */
-Shell.onResize=function(){
-  if(Shell.activeEng!==KEY || !S.p) return;
-  fitScale(); render();
-};
-/* the widest the problem will ever be is measured before the first line is
-   drawn, so the writing is sized once and then left alone. Each group takes a
-   turn at being the one in hand, since any of them may be picked first */
-function fitScale(){
-  const room=Shell.room();
-  if(!room.w) return;
-  const save={si:S.si, phase:S.phase, tag:S.tag.slice(), groups:S.groups.slice(),
-              cur:S.cur, ans:S.ansIn, exp:S.expIn.slice(), gone:S.gone, zap:S.zap,
-              ordered:S.ordered, reordered:S.reordered};
-  S.gone={}; S.zap=-1; S.ordered=true; S.reordered=false;
-  S.expIn=S.p.exp.map(function(i){ return bodyStr(S.p.terms[i]); });
-  const n=S.p.fams.length;
-  const pose=function(live){
-    const upto = live<0 ? n-1 : live;
-    S.groups=[];
-    for(let i=0;i<=upto;i++) S.groups.push({fi:i, done: live<0 ? true : i<live});
-    S.cur = live<0 ? -1 : live;
-    S.ansIn = live<0 ? "" : plainTerm(S.p.fams[live].term);
-    S.tag=S.p.terms.map(function(t,i){
-      const fi=famIndexOf(i);
-      return fi<=upto ? fi : null;
-    });
-  };
-  let raw=1;
-  const shot=function(ph,extra){
-    const i=idxOf(ph); if(i<0) return;
-    S.si=i; S.phase=ph;
-    const m=Shell.ghost('<div class="stage"><div class="eq">'+buildRows().join("")
-      + '</div><div>'+extra+'</div></div>');
-    if(m.length && m[0].w) raw=Math.min(raw, room.w/(m[0].w*1.04));
-  };
-  if(idxOf("expand")>=0){ pose(-1); S.tag=S.p.terms.map(function(){ return null; });
-    S.groups=[]; S.cur=-1; shot("expand",""); }
-  for(let g=0; g<n; g++){ pose(g); shot("work",""); }
-  pose(-1); shot("check",checkHTML());
-  S.si=save.si; S.phase=save.phase; S.tag=save.tag; S.groups=save.groups;
-  S.cur=save.cur; S.ansIn=save.ans; S.expIn=save.exp; S.gone=save.gone; S.zap=save.zap;
-  S.ordered=save.ordered; S.reordered=save.reordered;
-  /* below this the writing stops being worth reading, and the page can scroll
-     sideways instead */
-  Shell.scale=Math.max(raw,0.58);
-  const work=document.querySelector(".work");
-  work.style.overflowX = (raw < Shell.scale-0.001) ? "auto" : "visible";
-}
-
-/* ============ starting ============ */
-function begin(fl){
-  S.fl=fl||S.fl;
-  S.p=genProblem(S.fl);
-  S.tag=S.p.terms.map(function(){ return null; });
-  S.groups=[]; S.cur=-1; S.ansIn=""; S.gone={}; S.zap=-1;
-  S.expIn=S.p.exp.map(function(){ return ""; });
-  S.miss=""; S.note=""; S.hint=false; S.clean=true; S.shakeI=-1;
-  S.ordered=false; S.reordered=false; S.usedHint=false;
-  S.secs=0; S.perfect=false; S.gain=0; S.fast=false; S.pts=0; S.timeAdd=0; S.t0=Date.now();
-  S.si=0; S.phase=S.p.steps[0];
-  fitScale();
-  setPhase(S.p.steps[0]);
-}
-function nextProblem(){ Shell.next(); }
+  setBuf(v);
+  if(spaced && v.replace(/^[+\-]/,"")){ if(commit(v)) return; paintMirror(); return; }
+  paintMirror();
+  autoAccept();
+});
+key.addEventListener("keydown",function(e){
+  if(e.key==="Enter"){
+    e.preventDefault();
+    if(S.phase==="done"){ if(Date.now()-S.doneAt>400) goNext(); return; }
+    commit(buf);
+  }
+});
+["keyup","click","select","focus"].forEach(function(ev){
+  key.addEventListener(ev,function(){
+    if(ev==="click"||ev==="focus"){ try{ key.setSelectionRange(buf.length,buf.length); }catch(e){} }
+    paintMirror();
+  });
+});
+key.addEventListener("focus",function(){ $("work").classList.add("focus"); });
+key.addEventListener("blur",function(){ $("work").classList.remove("focus"); });
+function focusKey(){ try{ key.focus({preventScroll:true}); }catch(e){ key.focus(); } }
 
 document.addEventListener("keydown",function(e){
-  if(Shell.activeEng!==KEY) return;
-  if(e.key==="Enter" && S.phase==="check") nextProblem();
+  if(turninOpen()) return;
+  if(S.phase==="done" && e.key==="Enter" && document.activeElement!==key){ e.preventDefault(); if(Date.now()-S.doneAt<=400) return; goNext(); }
 });
 
-return {start:begin};
+function pickTerm(el){
+  const j=+el.id.slice(1), f=S.famOf[j];
+  if(S.used[f]) return;
+  if(S.picked[j]){
+    if(S.locked && S.locked[j]) return;
+    delete S.picked[j];
+    if(!Object.keys(S.picked).length) S.cur=-1;
+    render(); return;
+  }
+  if(S.cur>=0 && f!==S.cur){
+    el.classList.remove("shake"); void el.offsetWidth; el.classList.add("shake");
+    return;
+  }
+  S.cur=f; S.picked[j]=true; S.fresh=-1;
+  if(ready()){
+    if(rZero(S.q.fams[f].sum)){
+      render();
+      setTimeout(function(){ if(S.cur===f) acceptFam(f); },tileWait(f));
+      return;
+    }
+    render(); focusKey(); return;
+  }
+  render();
+}
+$("work").addEventListener("click",function(e){
+  const el=e.target.closest(".t.pick,.t.chosen");
+  if(el && el.id && el.id[0]==="f" && S.phase==="comb"){ pickTerm(el); return; }
+  if(S.phase==="dist" || (S.phase==="comb" && ready())) focusKey();
+});
+$("work").addEventListener("keydown",function(e){
+  const el=e.target.closest && e.target.closest(".t.pick,.t.chosen");
+  if(el && (e.key==="Enter"||e.key===" ")){ e.preventDefault(); pickTerm(el); }
+});
 
-})();
+$("nextBtn").addEventListener("click",goNext);
 
-Shell.next();
+/* ---------- 20 to turn in, then as many more as they like ----------
+   Every finished problem is kept with its answer and whether it went right
+   the first time. The 20th ends on the turn-in page; after that the drill
+   keeps going, and the Turn in link stays up to send an updated count. */
+const GOAL=20, DRILL_NAME="Combine Like Terms 1";
+let records=[], submitted=false, submittedAt=0;
+function lineText(list){
+  return list.map(function(t,i){
+    const s=plainTerm(t);
+    if(!i) return s;
+    return rNegQ(t.c) ? " "+MINUS+" "+s.slice(1) : " + "+s;
+  }).join("").replace(/\^2/g,"\u00b2").replace(/\^3/g,"\u00b3");
+}
+function answerText(q){
+  const live=q.fams.filter(function(f){ return !rZero(f.sum); }).map(function(f){ return f.term; });
+  return live.length ? lineText(stdSort(live)) : "0";
+}
+function setCount(){
+  const n=records.length+(S.phase==="done"?0:1);
+  $("count").textContent = n<=GOAL ? "Problem "+n+" of "+GOAL : "Problem "+n;
+  $("tiLink").hidden = records.length<GOAL;
+}
+function finishProblem(){
+  records.push({q:lineText(S.q.terms), a:answerText(S.q), clean:!S.flub});
+  const b=$("nextBtn");
+  b.textContent = records.length===GOAL ? "Turn in my work" : "Next";
+  setTimeout(function(){ if(S.phase==="done") b.classList.add("show"); }, Math.max(0,S.doneAt-Date.now()));
+  setCount();
+}
+function goNext(){
+  if(records.length===GOAL && S.phase==="done" && !S.sentOn){ S.sentOn=true; showTurnIn(); return; }
+  start();
+}
+const escHtml=function(t){ return esc(t); };
+const cleanCount=function(){ return records.filter(function(r){ return r.clean; }).length; };
+function turninOpen(){ return !$("turnin").hidden; }
+function showTurnIn(){
+  const done=records.length, clean=cleanCount();
+  $("ti-title").textContent = done>GOAL ? done+" problems done" : "All "+GOAL+" done";
+  $("ti-sub").textContent = "Enter your period and name to turn in your work. "
+    + "After that you can keep practicing as long as you like.";
+  $("ti-recap").innerHTML = "<div>Problems<b>"+done+"</b></div>"
+    + "<div>Right the first time<b>"+clean+"</b></div>"
+    + "<div>Needed a retry<b>"+(done-clean)+"</b></div>";
+  $("ti-log").innerHTML = '<div class="ti-log">'+records.map(function(r,i){
+    return '<div class="ti-row"><span class="ti-n">'+(i+1)+'.</span>'
+      + '<span class="ti-q">'+escHtml(r.q)+" = "+escHtml(r.a)+'</span>'
+      + '<span class="ti-k'+(r.clean?"":" retry")+'">'+(r.clean?"first try":"retry")+'</span></div>';
+  }).join("")+"</div>";
+  const more = submitted && done>submittedAt;
+  $("gform").hidden = submitted && !more;
+  if(more){
+    $("ti-feedback").innerHTML='<span class="nt">You turned in '+submittedAt+" \u2014 you have "+done+" now. "
+      + "Send it again and the newer one counts.</span>";
+    $("ti-submit").textContent="Send updated results";
+  } else if(!submitted){
+    $("ti-feedback").innerHTML="";
+    $("ti-submit").textContent="Submit Results";
+  }
+  $("formScore").value=done;
+  $("turnin").hidden=false;
+  $("turnin").scrollTop=0;
+  if(!submitted || more) setTimeout(function(){ $(submitted?"ti-submit":"studentPeriod").focus(); },50);
+}
+function backToPractice(){
+  $("turnin").hidden=true;
+  if(S.phase==="done") start(); else focusKey();
+}
+window.onHiddenFrameLoad=function(){
+  if(!submitted) return;
+  $("ti-feedback").innerHTML='<span class="ok">Successfully submitted. You can close this page, or keep practicing.</span>';
+  $("gform").hidden=true;
+};
+function nameCheck(){
+  const ln=$("lastName").value.trim(), fn=$("firstName").value.trim();
+  const row=function(t,v){ return '<div class="r"><span class="t">'+t+'</span><span class="v'+(v?"":" empty")+'">'
+    + (v?escHtml(v):"\u2014")+"</span></div>"; };
+  $("nameCheck").innerHTML='<div class="hd">This is what will be sent \u2014 check it is the right way round:</div>'
+    + row("Last name",ln)+row("First name",fn)+row("Roll call", ln&&fn ? ln+", "+fn : "");
+}
+["lastName","firstName"].forEach(function(id){ $(id).addEventListener("input",nameCheck); });
+nameCheck();
+$("gform").addEventListener("submit",function(){
+  const ln=$("lastName").value.trim(), fn=$("firstName").value.trim();
+  $("studentName").value="Period "+$("studentPeriod").value.trim()+" \u2014 "+ln+" \u2014 "+fn
+    + " \u2014 "+cleanCount()+" clean solves \u2014 "+DRILL_NAME+" ("+records.length+" problems)";
+  $("formScore").value=records.length;
+  submitted=true; submittedAt=records.length;
+});
+$("ti-back").addEventListener("click",backToPractice);
+$("tiLink").addEventListener("click",showTurnIn);
+
+/* ---------- algebra tiles ----------
+   For the plain problems — one letter, squares at most, whole numbers — each
+   term is laid out as tiles. When a group is gathered, every positive tile
+   meets a negative partner and the pair vanishes: a zero pair. What is left
+   is the answer for that group. */
+let tilesOn=true;
+try{ if(localStorage.getItem("tilesOn")==="0") tilesOn=false; }catch(e){}
+S.tilePending={}; S.tileTimers={}; S.locked={}; S.rowGone={};
+const WAIT_MS=1000, MOVE_MS=800, HOLD_MS=200, FADE_MS=400;  /* let a freshly shown row land before pairs start */
+function stillMotion(){
+  return !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+}
+/* ---- the shape of each kind of tile ----
+   Sizes are in units of u, one side of a loose-number tile. The first letter
+   of the problem (x, say) is a bar A long; a second letter (y) is a longer bar
+   B, so the two can never be mistaken for each other. Squares and the xy
+   rectangle are built from those same sides, the way real tiles are. */
+const TA=3, TB=4, TW=1.1;
+function tileLetters(q){
+  const names=[];
+  q.terms.forEach(function(t){ t.vs.forEach(function(x){ if(names.indexOf(x.v)<0) names.push(x.v); }); });
+  return names.sort();
+}
+function tileShape(vs,names){
+  const side=function(v){ return names.indexOf(v)===0 ? TA : TB; };
+  const first=function(v){ return names.indexOf(v)===0; };
+  if(!vs.length) return {w:TW, h:TW, k:"k1", f:.5};
+  if(vs.length===1 && vs[0].p===1) return {w:TW, h:side(vs[0].v), k:first(vs[0].v)?"kx":"ky", f:.58, bar:true};
+  if(vs.length===1 && vs[0].p===2) return {w:side(vs[0].v), h:side(vs[0].v), k:first(vs[0].v)?"kxx":"kyy", f:.8};
+  if(vs.length===2 && vs[0].p===1 && vs[1].p===1) return {w:TB, h:TA, k:"kxy", f:.8};
+  return null;
+}
+function tileable(q){
+  const names=tileLetters(q);
+  if(names.length>2) return false;
+  return q.terms.every(function(t){ return !!tileShape(t.vs,names); });
+}
+const UFRAC={2:"\u00bd",3:"\u2153",4:"\u00bc",5:"\u2155",6:"\u2159",8:"\u215b"};
+function tileLabel(vs,neg,L){
+  const s=neg?MINUS:"";
+  const piece = L>1 ? (UFRAC[L]||("1/"+L)) : "";
+  if(!vs.length) return "<span>"+s+(piece||"1")+"</span>";
+  return "<span>"+s+piece+vs.map(function(x){ return "<i>"+x.v+"</i>"+(x.p>1?"<sup>"+x.p+"</sup>":""); }).join("")+"</span>";
+}
+function clearTileTimers(){
+  Object.keys(S.tileTimers).forEach(function(f){ S.tileTimers[f].forEach(clearTimeout); });
+  S.tileTimers={};
+}
+function buildTiles(){
+  const box=$("tiles");
+  clearTileTimers(); S.tilePending={}; S.locked={}; S.rowGone={}; S.viaClick={};
+  S.tiles=tileable(S.q);
+  $("tileBtn").hidden=!S.tiles;
+  if(!S.tiles || !tilesOn){ box.innerHTML=""; box.hidden=true; return; }
+  box.hidden=false;
+  const q=S.q, names=tileLetters(q);
+  /* a fraction in front is shown as that many pieces, every piece in a group
+     cut to the same size: 1/2 x next to 3/4 x becomes two quarter-pieces and
+     three more, which is the common denominator made visible */
+  const plan=q.fams.map(function(fam){
+    let L=1;
+    fam.idx.forEach(function(j){ L=lcm(L,q.terms[j].c.d); });
+    const sh=tileShape(fam.vs,names);
+    const pw = L>1 && sh.bar ? sh.w*1.7 : sh.w/(sh.bar?1:L);
+    const ph = L>1 && sh.bar ? sh.h/L : sh.h;
+    return {L:L, sh:sh, w:pw, h:ph, counts:fam.idx.map(function(j){
+      const c=q.terms[j].c; return Math.abs(c.n)*(L/c.d)*(c.n<0?-1:1);
+    })};
+  });
+  /* scale everything down together when there is a lot to lay out */
+  let area=0;
+  plan.forEach(function(p){ p.counts.forEach(function(n){ area+=Math.abs(n)*(p.w+.35)*(p.h+.35); }); });
+  const base=Math.max(18, Math.min(24, window.innerWidth*0.036));
+  const room=Math.min(window.innerWidth,1000)*230;
+  const u=Math.max(8, Math.min(base, Math.sqrt(room/Math.max(area,1))));
+  const order=q.fams.map(function(x,i){ return i; }).sort(function(a,b){
+    const da=degOf(q.fams[a].term), db=degOf(q.fams[b].term);
+    if(da!==db) return db-da;
+    return vsTxt(q.fams[a].vs)<vsTxt(q.fams[b].vs) ? -1 : 1;
+  });
+  let h="";
+  order.forEach(function(f){
+    const fam=q.fams[f], p=plan[f];
+    let P=0, N=0;
+    p.counts.forEach(function(n){ if(n>0) P+=n; else N-=n; });
+    const pairs=Math.min(P,N);
+    const W=p.w*u, H=p.h*u;
+    const font=Math.min(p.sh.f*u, 0.62*Math.min(W,H)*(p.L>1?1.2:1.6));
+    const st='width:'+W.toFixed(1)+'px;height:'+H.toFixed(1)+'px;font-size:'+font.toFixed(1)+'px';
+    const cls=' '+p.sh.k+(p.L>1?" frac":"")+(font<7?" nolab":"");
+    let pi=0, ni=0;
+    h+='<div class="fam hid" data-f="'+f+'">';
+    fam.idx.forEach(function(j,r){
+      const n=p.counts[r], neg=n<0;
+      h+='<div class="trow hid" data-j="'+j+'" style="gap:'+Math.max(3,u*.25).toFixed(0)+'px">';
+      for(let k=0;k<Math.abs(n);k++){
+        let pr=-1;
+        if(neg){ if(ni<pairs) pr=ni; ni++; } else { if(pi<pairs) pr=pi; pi++; }
+        h+='<span class="tile'+cls+(neg?" neg":"")+'" style="'+st+'"'+''+'>'
+          + tileLabel(fam.vs,neg,p.L)+'</span>';
+      }
+      h+='</div>';
+    });
+    h+='</div>';
+  });
+  box.innerHTML=h;
+  updateTiles(true);
+}
+function famBox(f){ return $("tiles").querySelector('.fam[data-f="'+f+'"]'); }
+/* how long the end-of-problem replay takes, so Next waits for it: the typed
+   groups appear, sit for a moment, and their opposite pairs combine */
+function replayMs(){
+  if(!S.tiles || !tilesOn) return 0;
+  const typed=S.q.fams.filter(function(x,f){ return !S.viaClick[f]; });
+  if(!typed.length) return 0;
+  const pairs=typed.some(function(x){
+    let P=0,N=0;
+    x.idx.forEach(function(j){ const n=S.q.terms[j].c.n; if(n>0) P+=n; else N-=n; });
+    return P && N;
+  });
+  return pairs ? WAIT_MS+MOVE_MS+HOLD_MS+FADE_MS+250 : 700;
+}
+/* the last step of the picture: whatever is left of each group slides into
+   one row, so 6 negative m tiles and 5 more become a single run of 11 — the
+   answer, laid out */
+function gatherAll(){
+  if(!S.tiles || !tilesOn || S.phase!=="done") return;
+  if(S.q.fams.some(function(x,f){ return S.tilePending[f]; })){
+    S.tileTimers.g=[setTimeout(gatherAll,300)]; return;
+  }
+  $("tiles").querySelectorAll(".fam").forEach(function(el){
+    const rows=[].filter.call(el.querySelectorAll(".trow:not(.hid):not(.spent)"),function(r){
+      return r.querySelector(".tile:not(.vanished)");
+    });
+    if(rows.length<2) return;
+    const tiles=[];
+    rows.forEach(function(r){ r.querySelectorAll(".tile:not(.vanished)").forEach(function(t){ tiles.push(t); }); });
+    const before=tiles.map(function(t){ return t.getBoundingClientRect(); });
+    tiles.forEach(function(t){ rows[0].appendChild(t); });
+    rows.slice(1).forEach(function(r){ r.classList.add("spent"); });
+    tiles.forEach(function(t,i){
+      const a=t.getBoundingClientRect();
+      t.style.transition="none";
+      t.style.transform="translate("+(before[i].left-a.left)+"px,"+(before[i].top-a.top)+"px)";
+    });
+    void el.offsetWidth;
+    tiles.forEach(function(t){
+      t.style.transition="transform 500ms ease-in-out";
+      t.style.transform="";
+    });
+  });
+}
+function tileWait(f){
+  if(!S.tiles || !tilesOn) return 450;
+  return WAIT_MS+MOVE_MS+HOLD_MS+FADE_MS+300;
+}
+function tidyFam(el){
+  let any=false;
+  el.querySelectorAll(".trow").forEach(function(r){
+    const left=r.querySelectorAll(".tile:not(.vanished)").length;
+    r.classList.toggle("spent",!left);
+    if(!left) S.rowGone[+r.dataset.j]=true;
+    if(left) any=true;
+  });
+  el.classList.toggle("spent",!any);
+}
+/* ---------- cancelling ----------
+   Whatever is on the board in a group is what can cancel: as soon as the
+   clicked terms of one group show both positive and negative tiles, they sit
+   for a couple of seconds, then each positive meets a negative halfway and
+   the pair fades out. So clicking 4 and -4 cancels them straight away, even
+   if a -6 in the same group has not been clicked yet; clicking it afterwards
+   just brings its tiles down beside whatever is left. */
+function liveTiles(f){
+  const el=famBox(f), pos=[], neg=[];
+  if(!el) return {pos:pos, neg:neg, el:el};
+  el.querySelectorAll(".trow:not(.hid) .tile:not(.vanished)").forEach(function(t){
+    (t.classList.contains("neg")?neg:pos).push(t);
+  });
+  return {pos:pos, neg:neg, el:el};
+}
+function canCancel(f){
+  const L=liveTiles(f);
+  return L.pos.length>0 && L.neg.length>0;
+}
+function scheduleCancel(f){
+  S.tilePending[f]=true;
+  const T=S.tileTimers[f]=S.tileTimers[f]||[];
+  T.push(setTimeout(function(){ cancelNow(f,false); }, WAIT_MS));
+}
+function cancelNow(f,instant){
+  const L=liveTiles(f), k=Math.min(L.pos.length,L.neg.length);
+  if(!k){ S.tilePending[f]=false; dimTiles(); return; }
+  const pairs=[];
+  for(let i=0;i<k;i++) pairs.push([L.pos[i],L.neg[i]]);
+  pairs.forEach(function(pr){ pr.forEach(function(t){ S.locked[+t.parentNode.dataset.j]=true; }); });
+  if(instant){
+    pairs.forEach(function(pr){ pr.forEach(function(t){ t.classList.add("vanished"); }); });
+    tidyFam(L.el); S.tilePending[f]=false; return;
+  }
+  S.tilePending[f]=true;
+  const T=S.tileTimers[f]=S.tileTimers[f]||[];
+  pairs.forEach(function(pr){
+    const a=pr[0].getBoundingClientRect(), b=pr[1].getBoundingClientRect();
+    const mx=(a.left+b.left)/2, my=(a.top+b.top)/2;
+    pr.forEach(function(t,i){
+      const r=i?b:a;
+      t.classList.add("mover");
+      if(t.classList.contains("neg")) t.style.zIndex="4";
+      t.style.transition="transform "+MOVE_MS+"ms ease-in-out";
+      t.style.transform="translate("+(mx-r.left)+"px,"+(my-r.top)+"px)";
+    });
+  });
+  T.push(setTimeout(function(){
+    pairs.forEach(function(pr){ pr.forEach(function(t){
+      t.style.transition="transform "+MOVE_MS+"ms ease-in-out, opacity "+FADE_MS+"ms ease-out";
+      t.style.opacity="0";
+    }); });
+  }, MOVE_MS+HOLD_MS));
+  T.push(setTimeout(function(){
+    pairs.forEach(function(pr){ pr.forEach(function(t){ t.classList.add("vanished"); }); });
+    tidyFam(L.el);
+    S.tilePending[f]=false;
+    S.fresh=-1;
+    render();            /* crosses out the terms that are now gone; also
+                            starts another round if more opposites arrived */
+  }, MOVE_MS+HOLD_MS+FADE_MS+50));
+}
+/* a group already combined greys out once its tiles have settled, so the
+   student's eye stays on the group they are working; when the problem is
+   finished, everything left comes back to full colour as the answer */
+function dimTiles(){
+  if(!S.tiles || !tilesOn) return;
+  $("tiles").querySelectorAll(".fam").forEach(function(el){
+    const f=+el.dataset.f;
+    el.classList.toggle("dim", !!S.used[f] && !S.tilePending[f] && S.phase!=="done");
+  });
+}
+function updateTiles(instant){
+  if(!S.tiles || !tilesOn) return;
+  /* a term's tiles are laid out once that term is clicked, and go away again
+     if it is unclicked before anything of it has cancelled */
+  $("tiles").querySelectorAll(".trow").forEach(function(r){
+    const j=+r.dataset.j, f=S.famOf[j];
+    const vis=!!S.picked[j] || !!S.locked[j] || (!!S.used[f] && (!!S.viaClick[f] || S.phase==="done"));
+    const was=!r.classList.contains("hid");
+    r.classList.toggle("hid",!vis);
+    r.classList.toggle("show", vis && !was && !instant);
+  });
+  $("tiles").querySelectorAll(".fam").forEach(function(el){
+    el.classList.toggle("hid", !el.querySelector(".trow:not(.hid)"));
+  });
+  S.q.fams.forEach(function(fam,f){
+    if(S.tilePending[f] || !canCancel(f)) return;
+    if(instant) cancelNow(f,true); else scheduleCancel(f);
+  });
+  dimTiles();
+}
+$("tileBtn").setAttribute("aria-pressed", tilesOn?"true":"false");
+$("tileBtn").addEventListener("click",function(){
+  tilesOn=!tilesOn;
+  try{ localStorage.setItem("tilesOn", tilesOn?"1":"0"); }catch(e){}
+  this.setAttribute("aria-pressed", tilesOn?"true":"false");
+  buildTiles();
+});
+
+let rz=null;
+window.addEventListener("resize",function(){
+  cancelAnimationFrame(rz); rz=requestAnimationFrame(function(){ drawArrows(false); });
+});
+if(document.fonts && document.fonts.ready) document.fonts.ready.then(function(){ drawArrows(false); });
+
+start();
+
 </script>
 </body>
 </html>
