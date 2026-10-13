@@ -135,9 +135,11 @@
   .head{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 14px;}
   .dtitle{margin:0;font-size:1.15rem;font-weight:700;color:var(--ink);}
   .count{color:var(--soft);font-size:.95rem;}
-  .tilink{font:inherit;font-size:.9rem;background:none;border:none;padding:2px 4px;color:var(--f0);
-          text-decoration:underline;cursor:pointer;}
-  .tilink[hidden]{display:none;}
+  .count{font-weight:700;color:var(--f0);font-variant-numeric:tabular-nums;}
+  .tilink{font:inherit;font-weight:700;font-size:.85rem;cursor:pointer;border-radius:8px;
+          background:var(--field);color:var(--f0);border:2px solid var(--u0);padding:3px 12px;}
+  .tilink:hover{border-color:var(--f0);}
+  .tilink:focus-visible{outline:2px solid var(--pen);outline-offset:2px;}
 
   /* ---- turning it in ---- */
   .turnin{position:fixed;inset:0;z-index:100;overflow:auto;background:var(--page);}
@@ -145,7 +147,9 @@
   .ti-inner{max-width:640px;margin:clamp(12px,4vh,40px) auto;padding:26px clamp(18px,4vw,34px) 30px;
             background:var(--field);border:1px solid var(--edge);border-radius:14px;}
   .ti-inner h2{margin:0 0 6px;font-size:1.5rem;}
+  .ti-inner h3{margin:26px 0 10px;font-size:1.05rem;}
   .ti-sub{color:var(--soft);line-height:1.55;margin:0 0 18px;}
+  .ti-empty{color:var(--soft);margin-top:14px;}
   .ti-recap{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;}
   .ti-recap>div{border:1.5px solid var(--edge);border-radius:10px;padding:10px 14px;color:var(--soft);font-size:.85rem;}
   .ti-recap b{display:block;color:var(--ink);font-size:1.5rem;}
@@ -153,10 +157,10 @@
           border-top:1.5px solid var(--edge);border-bottom:1.5px solid var(--edge);}
   .ti-row{display:flex;gap:10px;align-items:baseline;padding:5px 2px;}
   .ti-n{color:var(--soft);min-width:28px;text-align:right;font-size:.85rem;}
-  .ti-q{flex:1;min-width:0;}
+  .ti-q{flex:1;min-width:0;overflow-wrap:anywhere;}
   .ti-k{font-size:.8rem;white-space:nowrap;color:var(--ok);}
   .ti-k.retry{color:var(--f3);}
-  #gform{margin-top:20px;}
+  #gform{margin-top:4px;}
   #gform[hidden]{display:none;}
   .ti-warn{background:var(--u3);border-radius:10px;padding:11px 14px;margin-bottom:18px;line-height:1.55;font-size:.92rem;}
   .ti-field{margin-bottom:14px;}
@@ -182,6 +186,8 @@
             align-items:center;flex-wrap:wrap;color:var(--soft);}
   .ti-ghost{font:inherit;border:1px solid var(--edge);border-radius:10px;padding:8px 16px;background:none;
             color:var(--ink);cursor:pointer;}
+  /* the tiles switch says what it is, so it can be found */
+  .icon.lab{width:auto;padding:0 12px;gap:7px;display:inline-flex;align-items:center;font:inherit;font-size:.9rem;}
 
   /* ---- algebra tiles ---- */
   .icon[hidden]{display:none;}
@@ -200,7 +206,8 @@
   .tile.kxx{background:var(--tp2);} .tile.kx{background:var(--tp1);}
   .tile.k1{background:var(--tp0);color:#3a2a00;}
   .tile.ky{background:var(--tpy);} .tile.kyy{background:var(--tpyy);} .tile.kxy{background:var(--tpxy);}
-  .tile.frac{border-width:1.5px;}
+  .tile.frac{border-width:1.5px;font-weight:700;}
+  .tile .tfr{letter-spacing:-.02em;margin-right:.08em;}
   .tile.nolab span{display:none;}
   .tile.neg{background:var(--tn);color:#fff;}
   .tile.meet{transform:scale(1.1);box-shadow:0 3px 10px rgba(0,0,0,.25);transition:transform .18s ease-out,box-shadow .18s;}
@@ -225,11 +232,12 @@
     <div class="head">
       <h1 class="dtitle">Combine Like Terms 1</h1>
       <span class="count" id="count">Problem 1 of 20</span>
-      <button class="tilink" id="tiLink" type="button" hidden>Turn in</button>
+      <button class="tilink" id="tiLink" type="button">Turn in</button>
     </div>
     <div class="grow"></div>
-    <button class="icon" id="tileBtn" title="Show or hide algebra tiles" aria-label="Algebra tiles" aria-pressed="true">
+    <button class="icon lab" id="tileBtn" title="Show or hide algebra tiles" aria-label="Algebra tiles" aria-pressed="true">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="3" width="10" height="10"/><rect x="15" y="3" width="4" height="10"/><rect x="3" y="15" width="4" height="4"/><rect x="9" y="15" width="4" height="4"/></svg>
+      <span>Tiles</span>
     </button>
   </div>
 
@@ -245,23 +253,14 @@
     <button class="next" id="nextBtn">Next</button>
   </div>
 
-<div class="turnin" id="turnin" role="dialog" aria-labelledby="ti-title" hidden>
+<div class="turnin" id="turnin" role="dialog" aria-label="Turn in your work" hidden>
   <div class="ti-inner">
-    <h2 id="ti-title">All 20 done</h2>
-    <p class="ti-sub" id="ti-sub">Enter your period and name to turn in your work.</p>
-    <div class="ti-recap" id="ti-recap"></div>
-    <div id="ti-log"></div>
 
     <iframe name="hidden_iframe" id="hidden_iframe" style="display:none"
             onload="if(window.onHiddenFrameLoad)onHiddenFrameLoad()"></iframe>
 
     <form action="https://docs.google.com/forms/d/e/1FAIpQLSe4_Gnrq1zyrttA3lSgrVBtMkaVaoMim31ByzoH-orxmfDB2A/formResponse"
           method="POST" target="hidden_iframe" id="gform">
-      <div class="ti-warn">
-        Read the box labels before you type. Your <b>LAST name</b> goes in the
-        <b>Last name</b> box and your <b>FIRST name</b> goes in the <b>First name</b> box.
-        Swapped names cannot be matched to the roster and count as missing.
-      </div>
       <div class="ti-field">
         <label for="studentPeriod"><span class="ti-num">1</span>Period</label>
         <input type="number" id="studentPeriod" placeholder="e.g. 3" min="1" max="10" required>
@@ -284,9 +283,14 @@
 
     <div class="ti-feedback" id="ti-feedback"></div>
     <div class="ti-after">
-      <span>Want more practice?</span>
+      <span id="ti-after-lab">Want more practice?</span>
       <button class="ti-ghost" type="button" id="ti-back">Keep practicing</button>
     </div>
+
+    <!-- the work goes under the form, so the name boxes are the first thing on the page -->
+    <h3>Your work</h3>
+    <div class="ti-recap" id="ti-recap"></div>
+    <div id="ti-log"></div>
   </div>
 </div>
 
@@ -1021,7 +1025,8 @@ function start(){
   plusNote(false);
   setBuf("");
   $("nextBtn").classList.remove("show");
-  if(typeof setCount==="function") setCount();
+  served++; currentDone=false;
+  setCount();
   render();
   focusKey();
 }
@@ -1275,9 +1280,8 @@ function acceptDist(){
 }
 function acceptFam(f){
   plusNote(false);
-  /* a group the student worked by clicking has already shown its tiles; a
-     group they simply typed the answer to keeps its tiles back until the
-     end, when the whole board is laid out and combined in one go */
+  /* remember whether the group was worked by clicking: a student who has
+     only typed is not made to click a pair of opposites at the end */
   if(S.viaClick) S.viaClick[f] = f===S.cur || S.q.fams[f].idx.some(function(j){
     return S.picked[j] || (S.locked && S.locked[j]);
   });
@@ -1536,10 +1540,12 @@ $("nextBtn").addEventListener("click",goNext);
 
 /* ---------- 20 to turn in, then as many more as they like ----------
    Every finished problem is kept with its answer and whether it went right
-   the first time. The 20th ends on the turn-in page; after that the drill
-   keeps going, and the Turn in link stays up to send an updated count. */
+   the first time. After the 20th, Next becomes the way to the turn-in page.
+   The Turn in button at the top opens the same page at any time, so a student
+   who runs out of time can send what they have; they can go back, keep
+   working, and send again (the newer one counts). */
 const GOAL=20, DRILL_NAME="Combine Like Terms 1";
-let records=[], submitted=false, submittedAt=0;
+let records=[], submitted=false, submittedAt=0, served=0, currentDone=false, autoShown=false;
 function lineText(list){
   return list.map(function(t,i){
     const s=plainTerm(t);
@@ -1552,19 +1558,24 @@ function answerText(q){
   return live.length ? lineText(stdSort(live)) : "0";
 }
 function setCount(){
-  const n=records.length+(S.phase==="done"?0:1);
-  $("count").textContent = n<=GOAL ? "Problem "+n+" of "+GOAL : "Problem "+n;
-  $("tiLink").hidden = records.length<GOAL;
+  $("count").textContent = served<=GOAL ? "Problem "+served+" of "+GOAL
+                                        : "Problem "+served+" \u00b7 extra practice";
+}
+function nextLabel(){
+  return (records.length===GOAL && !autoShown) ? "Turn in my work \u2192" : "Next";
 }
 function finishProblem(){
-  records.push({q:lineText(S.q.terms), a:answerText(S.q), clean:!S.flub});
+  if(!currentDone){
+    currentDone=true;
+    records.push({q:lineText(S.q.terms), a:answerText(S.q), clean:!S.flub});
+  }
   const b=$("nextBtn");
-  b.textContent = records.length===GOAL ? "Turn in my work" : "Next";
+  b.textContent = nextLabel();
   setTimeout(function(){ if(S.phase==="done") b.classList.add("show"); }, Math.max(0,S.doneAt-Date.now()));
   setCount();
 }
 function goNext(){
-  if(records.length===GOAL && S.phase==="done" && !S.sentOn){ S.sentOn=true; showTurnIn(); return; }
+  if(records.length>=GOAL && !autoShown){ autoShown=true; showTurnIn(); return; }
   start();
 }
 const escHtml=function(t){ return esc(t); };
@@ -1572,17 +1583,23 @@ const cleanCount=function(){ return records.filter(function(r){ return r.clean; 
 function turninOpen(){ return !$("turnin").hidden; }
 function showTurnIn(){
   const done=records.length, clean=cleanCount();
-  $("ti-title").textContent = done>GOAL ? done+" problems done" : "All "+GOAL+" done";
-  $("ti-sub").textContent = "Enter your period and name to turn in your work. "
-    + "After that you can keep practicing as long as you like.";
+  if(done>=GOAL){
+    $("ti-after-lab").textContent="Want more practice?";
+    $("ti-back").textContent="Keep practicing";
+  } else {
+    $("ti-after-lab").textContent="Not done yet?";
+    $("ti-back").textContent="Go back and keep working";
+  }
   $("ti-recap").innerHTML = "<div>Problems<b>"+done+"</b></div>"
     + "<div>Right the first time<b>"+clean+"</b></div>"
     + "<div>Needed a retry<b>"+(done-clean)+"</b></div>";
-  $("ti-log").innerHTML = '<div class="ti-log">'+records.map(function(r,i){
-    return '<div class="ti-row"><span class="ti-n">'+(i+1)+'.</span>'
-      + '<span class="ti-q">'+escHtml(r.q)+" = "+escHtml(r.a)+'</span>'
-      + '<span class="ti-k'+(r.clean?"":" retry")+'">'+(r.clean?"first try":"retry")+'</span></div>';
-  }).join("")+"</div>";
+  $("ti-log").innerHTML = done
+    ? '<div class="ti-log">'+records.map(function(r,i){
+        return '<div class="ti-row"><span class="ti-n">'+(i+1)+'.</span>'
+          + '<span class="ti-q">'+escHtml(r.q)+" = "+escHtml(r.a)+'</span>'
+          + '<span class="ti-k'+(r.clean?"":" retry")+'">'+(r.clean?"first try":"retry")+'</span></div>';
+      }).join("")+"</div>"
+    : '<div class="ti-empty">Nothing finished yet \u2014 finished problems show up here.</div>';
   const more = submitted && done>submittedAt;
   $("gform").hidden = submitted && !more;
   if(more){
@@ -1594,17 +1611,30 @@ function showTurnIn(){
     $("ti-submit").textContent="Submit Results";
   }
   $("formScore").value=done;
+  try{ $("key").blur(); }catch(e){}
   $("turnin").hidden=false;
   $("turnin").scrollTop=0;
   if(!submitted || more) setTimeout(function(){ $(submitted?"ti-submit":"studentPeriod").focus(); },50);
 }
+/* back to the drill: a finished problem moves on, a half-done one is left
+   right where it was */
 function backToPractice(){
   $("turnin").hidden=true;
-  if(S.phase==="done") start(); else focusKey();
+  const n=records.length;
+  if(S.phase==="done" && (n!==GOAL || autoShown)){
+    if(n>=GOAL) autoShown=true;
+    start();
+  } else {
+    $("nextBtn").textContent=nextLabel();
+    focusKey();
+  }
 }
 window.onHiddenFrameLoad=function(){
   if(!submitted) return;
-  $("ti-feedback").innerHTML='<span class="ok">Successfully submitted. You can close this page, or keep practicing.</span>';
+  $("ti-feedback").innerHTML='<span class="ok">Successfully submitted. '
+    + (records.length>=GOAL ? "You can close this page, or keep practicing."
+                            : "You can close this page, or go back and keep working.")
+    + '</span>';
   $("gform").hidden=true;
 };
 function nameCheck(){
@@ -1632,7 +1662,9 @@ $("tiLink").addEventListener("click",showTurnIn);
    meets a negative partner and the pair vanishes: a zero pair. What is left
    is the answer for that group. */
 let tilesOn=true;
-try{ if(localStorage.getItem("tilesOn")==="0") tilesOn=false; }catch(e){}
+/* its own key, so switching tiles off in another drill does not switch them off here */
+const TILE_KEY="combine1.tilesOn";
+try{ if(localStorage.getItem(TILE_KEY)==="0") tilesOn=false; }catch(e){}
 S.tilePending={}; S.tileTimers={}; S.locked={}; S.rowGone={};
 const WAIT_MS=1000, MOVE_MS=800, HOLD_MS=200, FADE_MS=400;  /* let a freshly shown row land before pairs start */
 function stillMotion(){
@@ -1664,9 +1696,13 @@ function tileable(q){
   return q.terms.every(function(t){ return !!tileShape(t.vs,names); });
 }
 const UFRAC={2:"\u00bd",3:"\u2153",4:"\u00bc",5:"\u2155",6:"\u2159",8:"\u215b"};
+/* whether any term in the group is negative, so its labels carry a minus */
+function neg0(fam){ return fam.idx.some(function(j){ return rNegQ(S.q.terms[j].c); }); }
 function tileLabel(vs,neg,L){
   const s=neg?MINUS:"";
-  const piece = L>1 ? (UFRAC[L]||("1/"+L)) : "";
+  /* written out as 1/6 rather than the single ⅙ character, which is too
+     small to read at tile size */
+  const piece = L>1 ? '<span class="tfr">1/'+L+'</span>' : "";
   if(!vs.length) return "<span>"+s+(piece||"1")+"</span>";
   return "<span>"+s+piece+vs.map(function(x){ return "<i>"+x.v+"</i>"+(x.p>1?"<sup>"+x.p+"</sup>":""); }).join("")+"</span>";
 }
@@ -1712,8 +1748,17 @@ function buildTiles(){
     let P=0, N=0;
     p.counts.forEach(function(n){ if(n>0) P+=n; else N-=n; });
     const pairs=Math.min(P,N);
-    const W=p.w*u, H=p.h*u;
-    const font=Math.min(p.sh.f*u, 0.62*Math.min(W,H)*(p.L>1?1.2:1.6));
+    let W=p.w*u, H=p.h*u, font=Math.min(p.sh.f*u, 0.62*Math.min(W,H)*1.6);
+    /* a fraction piece cut to scale can be only a few pixels thick, too thin
+       for its label. Every piece is kept at least big enough to read: thick
+       enough for a line of text, and wide enough for the label on it */
+    if(p.L>1){
+      font=16;
+      H=Math.max(H, 30);
+      const chars=(neg0(fam)?1:0)+String(p.L).length+2
+                 +fam.vs.reduce(function(n,x){ return n+1+(x.p>1?1:0); },0);
+      W=Math.max(W, font*0.68*chars+14);
+    }
     const st='width:'+W.toFixed(1)+'px;height:'+H.toFixed(1)+'px;font-size:'+font.toFixed(1)+'px';
     const cls=' '+p.sh.k+(p.L>1?" frac":"")+(font<7?" nolab":"");
     let pi=0, ni=0;
@@ -1735,18 +1780,22 @@ function buildTiles(){
   updateTiles(true);
 }
 function famBox(f){ return $("tiles").querySelector('.fam[data-f="'+f+'"]'); }
-/* how long the end-of-problem replay takes, so Next waits for it: the typed
-   groups appear, sit for a moment, and their opposite pairs combine */
+/* how long the end of the problem takes on the board, so Next waits for it:
+   anything not yet laid out appears, and any opposite pairs still to meet
+   combine before the leftovers are gathered into the answer */
 function replayMs(){
   if(!S.tiles || !tilesOn) return 0;
-  const typed=S.q.fams.filter(function(x,f){ return !S.viaClick[f]; });
-  if(!typed.length) return 0;
-  const pairs=typed.some(function(x){
+  let wait=false, fresh=false;
+  S.q.fams.forEach(function(x,f){
+    if(S.tilePending[f]) wait=true;
+    const el=famBox(f);
+    if(el && el.querySelector(".trow:not(.hid)")) return;
+    fresh=true;
     let P=0,N=0;
     x.idx.forEach(function(j){ const n=S.q.terms[j].c.n; if(n>0) P+=n; else N-=n; });
-    return P && N;
+    if(P && N) wait=true;
   });
-  return pairs ? WAIT_MS+MOVE_MS+HOLD_MS+FADE_MS+250 : 700;
+  return wait ? WAIT_MS+MOVE_MS+HOLD_MS+FADE_MS+250 : (fresh ? 700 : 0);
 }
 /* the last step of the picture: whatever is left of each group slides into
    one row, so 6 negative m tiles and 5 more become a single run of 11 — the
@@ -1870,7 +1919,9 @@ function updateTiles(instant){
      if it is unclicked before anything of it has cancelled */
   $("tiles").querySelectorAll(".trow").forEach(function(r){
     const j=+r.dataset.j, f=S.famOf[j];
-    const vis=!!S.picked[j] || !!S.locked[j] || (!!S.used[f] && (!!S.viaClick[f] || S.phase==="done"));
+    /* a group comes onto the board when its terms are clicked, and also when
+       its answer is typed, so the tiles show the combining either way */
+    const vis=!!S.picked[j] || !!S.locked[j] || !!S.used[f];
     const was=!r.classList.contains("hid");
     r.classList.toggle("hid",!vis);
     r.classList.toggle("show", vis && !was && !instant);
@@ -1887,7 +1938,7 @@ function updateTiles(instant){
 $("tileBtn").setAttribute("aria-pressed", tilesOn?"true":"false");
 $("tileBtn").addEventListener("click",function(){
   tilesOn=!tilesOn;
-  try{ localStorage.setItem("tilesOn", tilesOn?"1":"0"); }catch(e){}
+  try{ localStorage.setItem(TILE_KEY, tilesOn?"1":"0"); }catch(e){}
   this.setAttribute("aria-pressed", tilesOn?"true":"false");
   buildTiles();
 });
